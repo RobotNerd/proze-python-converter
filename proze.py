@@ -1,30 +1,44 @@
 #!/usr/bin/python3
-from strategy.text import TextStrategy
 from lib.comments import Comments
 from lib.names import Names
+from strategy.text import TextStrategy
+import lib.cli
+import lib.config
 
 comments = Comments()
 names = Names()
 
 
-# TODO parse target document type from the command line
-def determine_strategy(path, options):
+class StrategyNotFoundError(Exception):
+    pass
+
+
+def determine_strategy(args, options):
     """Determine the strategy to use when compiling the document.
+    @type  args: object
+    @param args: Parsed command line args.
     @type  options: DotMap
     @param options: Compile options parsed from the config file.
-    @rtype:  object
+    @rtype:  BaseStrategy
     @return: Strategy to use.
     """
-    pass
+    if args.doctype == 'pdf':
+        raise NotImplementedError
+    elif args.doctype == 'text':
+        return TextStrategy(options)
+    raise StrategyNotFoundError(
+        'Unrecognized strategy {}'.format(args.doctype)
+    )
 
 
 def run():
     """Compile proze to target format."""
-    # TODO parse cli args
-    # TODO find and load config file; use default options if none found
+    args = lib.cli.parse()
+    options = lib.config.load()
     strategy = determine_strategy(options)
     with strategy.compile(target_path) as compiler: #TODO output file name
         # TODO iterate through all *.proze files in config
+        # TODO print message and exit if no files found to compile
         with open(path, 'r') as proze_file:
             comments.reset()
             line_number = 0
