@@ -1,5 +1,6 @@
 """Parse prose config file."""
 from dotmap import DotMap
+import glob
 import json
 import os
 import yaml
@@ -35,13 +36,13 @@ def _find_config_path(args):
     if args.path:
         for name in filenames:
             path = args.path + '/' + name
-            if os.path.is_file(path):
+            if os.path.isfile(path):
                 return path
     else:
         cwd = os.getcwd()
         for name in filenames:
             path = cwd + '/' + name
-            if os.path.is_file(path):
+            if os.path.isfile(path):
                 return path
     return None
 
@@ -53,12 +54,10 @@ def _find_proze_files(args):
     @rtype:  list
     @return: Paths to proze files found.
     """
-    # TODO args.path contains target proze directory
-    if args.path:
-        pass
-    else:
-        cwd = os.getcwd()
-    raise NotImplementedError
+    root = args.path if args.path else cwd.getcwd()
+    return sorted(
+        glob.glob(root + '/**/*.proze', recursive=True)
+    )
 
 
 def load(args):
@@ -87,13 +86,12 @@ def _parse_config(path, options):
         are inserted into here.
     """
     with open(path, 'r') as conf:
-        ext = os.path.splitext(path)[1]
-        if ext == 'json':
+        if path.endswith('json'):
             parsed = json.loads(conf.read())
-        elif ext == 'yaml':
+        elif path.endswith('yaml') or path.endswith('yml'):
             parsed = yaml.safe_load(conf)
         else:
-            raise TypeError('Unrecognized config file type: {}'.format(ext))
+            raise TypeError('Unrecognized config file type: {}'.format(path))
         if parsed:
             _parse_compile_options(parsed, options)
             _parse_names(parsed, options)
@@ -120,7 +118,7 @@ def _parse_compile_order(parsed, options):
     """
     compiler = parsed.get('compile')
     if compiler:
-        order = order.get('order')
+        order = compiler.get('order')
         if order:
             options.compile.order = order
 

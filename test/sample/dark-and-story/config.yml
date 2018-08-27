@@ -1,0 +1,9 @@
+---
+compile:
+  order:
+    - title.proze
+    - erased.proze
+    - disaster.proze
+    - flee.proze
+    - reassurances.proze
+    - awakening.proze

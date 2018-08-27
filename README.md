@@ -12,3 +12,13 @@ converting them into a publishable document.
 
 > TODO
 
+## Running tests
+
+To run all test:
+
+`python3 -m unittest`
+
+Or, using pytest to enter the debugger on test failure:
+
+`python3 -m pytest --pdb -s`
+
