@@ -1,6 +1,7 @@
 """Parse prose config file."""
 from dotmap import DotMap
 import json
+import os
 import yaml
 
 
@@ -30,8 +31,19 @@ def _find_config_path(args):
     @rtype:  str
     @return: Path to config file if found. None otherwise.
     """
-    # TODO args.path contains target proze directory
-    raise NotImplementedError
+    filenames = ['config.json', 'config.yml', 'config.yaml']
+    if args.path:
+        for name in filenames:
+            path = args.path + '/' + name
+            if os.path.is_file(path):
+                return path
+    else:
+        cwd = os.getcwd()
+        for name in filenames:
+            path = cwd + '/' + name
+            if os.path.is_file(path):
+                return path
+    return None
 
 
 def _find_proze_files(args):
@@ -42,6 +54,10 @@ def _find_proze_files(args):
     @return: Paths to proze files found.
     """
     # TODO args.path contains target proze directory
+    if args.path:
+        pass
+    else:
+        cwd = os.getcwd()
     raise NotImplementedError
 
 
