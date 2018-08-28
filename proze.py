@@ -58,7 +58,8 @@ def execute_strategy(strategy, args, options):
     @param options: Compile options parsed from the config file.
     """
     comments = Comments()
-    with strategy.compile(args.output) as compiler:
+    output_path = args.output + '.' + args.doctype
+    with strategy.compile(output_path) as compiler:
         for path in options.compile.order:
             with open(path, 'r') as proze_file:
                 comments.reset()
