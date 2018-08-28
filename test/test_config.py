@@ -3,11 +3,35 @@ import lib.config
 import unittest
 
 paths = DotMap()
-paths.dark_and_stormy= 'test/sample/dark-and-story'
+paths.dark_and_stormy = 'test/sample/dark-and-story'
 paths.feelings = 'test/sample/feelings'
+paths.no_data = 'test/sample/no_data'
 
 
 class TestConfigLoader(unittest.TestCase):
+
+    def test_no_data(self):
+        """Test a project path that doesn't have a config nor proze files."""
+        order = []
+        args = DotMap()
+        args.path = paths.no_data
+        options = lib.config.load(args)
+        self.assertEqual(order, options.compile.order)
+
+    def test_order_from_config(self):
+        """Test globbing files based on config file"""
+        order = [
+            'title.proze',
+            'erased.proze',
+            'disaster.proze',
+            'flee.proze',
+            'reassurances.proze',
+            'awakening.proze',
+        ]
+        args = DotMap()
+        args.path = paths.dark_and_stormy
+        options = lib.config.load(args)
+        self.assertEqual(order, options.compile.order)
 
     def test_order_no_config(self):
         """Test globbing files for the file order if not in the config file."""
@@ -27,20 +51,5 @@ class TestConfigLoader(unittest.TestCase):
         ]
         args = DotMap()
         args.path = paths.feelings
-        options = lib.config.load(args)
-        self.assertEqual(order, options.compile.order)
-
-    def test_order_from_config(self):
-        """Test globbing files based on config file"""
-        order = [
-            'title.proze',
-            'erased.proze',
-            'disaster.proze',
-            'flee.proze',
-            'reassurances.proze',
-            'awakening.proze',
-        ]
-        args = DotMap()
-        args.path = paths.dark_and_stormy
         options = lib.config.load(args)
         self.assertEqual(order, options.compile.order)
