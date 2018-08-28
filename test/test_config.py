@@ -12,11 +12,14 @@ class TestConfigLoader(unittest.TestCase):
 
     def test_no_data(self):
         """Test a project path that doesn't have a config nor proze files."""
-        order = []
         args = DotMap()
         args.path = paths.no_data
         options = lib.config.load(args)
-        self.assertEqual(order, options.compile.order)
+        self.assertEqual(options.compile.order, [])
+        self.assertEqual(options.names.characters, [])
+        self.assertEqual(options.names.places, [])
+        self.assertEqual(options.names.things, [])
+        self.assertEqual(options.names.invalid, [])
 
     def test_order_from_config(self):
         """Test globbing files based on config file"""
