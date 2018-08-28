@@ -25,3 +25,7 @@ compile:
     - flee.proze
     - reassurances.proze
     - awakening.proze
+  paragraph:
+    tabFirstParagraph: 'always'
+    removeBlankLines: 'never'
+  spacing: 'double'

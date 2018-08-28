@@ -10,6 +10,15 @@ paths.no_data = 'test/sample/no_data'
 
 class TestConfigLoader(unittest.TestCase):
 
+    def test_compile_options(self):
+        """Test loading compile options from config file."""
+        args = DotMap()
+        args.path = paths.dark_and_stormy
+        options = lib.config.load(args)
+        self.assertEqual(options.compile.paragraph.tabFirstParagraph, 'always')
+        self.assertEqual(options.compile.paragraph.removeBlankLines, 'never')
+        self.assertEqual(options.compile.spacing, 'double')
+
     def test_names(self):
         """Test names loaded from config file."""
         characters = [
