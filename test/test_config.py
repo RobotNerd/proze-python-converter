@@ -10,6 +10,31 @@ paths.no_data = 'test/sample/no_data'
 
 class TestConfigLoader(unittest.TestCase):
 
+    def test_names(self):
+        """Test names loaded from config file."""
+        characters = [
+            'Dallas',
+            'Jacob',
+            'Kathy Jones',
+            'Sally',
+            'Winchester Mason',
+        ]
+        places = ['Happenstance Ridge', 'Tottle Town']
+        things = ['cheddar house', 'quick zapper']
+        invalid = [
+            'cheddar castle',
+            'Gerald',
+            'Happenstance Plateau',
+            'Yates',
+        ]
+        args = DotMap()
+        args.path = paths.dark_and_stormy
+        options = lib.config.load(args)
+        self.assertEqual(options.names.characters, characters)
+        self.assertEqual(options.names.places, places)
+        self.assertEqual(options.names.things, things)
+        self.assertEqual(options.names.invalid, invalid)
+
     def test_no_data(self):
         """Test a project path that doesn't have a config nor proze files."""
         args = DotMap()
@@ -22,7 +47,7 @@ class TestConfigLoader(unittest.TestCase):
         self.assertEqual(options.names.invalid, [])
 
     def test_order_from_config(self):
-        """Test globbing files based on config file"""
+        """Test globbing files based on config file."""
         order = [
             'title.proze',
             'erased.proze',
@@ -34,7 +59,7 @@ class TestConfigLoader(unittest.TestCase):
         args = DotMap()
         args.path = paths.dark_and_stormy
         options = lib.config.load(args)
-        self.assertEqual(order, options.compile.order)
+        self.assertEqual(options.compile.order, order)
 
     def test_order_no_config(self):
         """Test globbing files for the file order if not in the config file."""
@@ -55,4 +80,4 @@ class TestConfigLoader(unittest.TestCase):
         args = DotMap()
         args.path = paths.feelings
         options = lib.config.load(args)
-        self.assertEqual(order, options.compile.order)
+        self.assertEqual(options.compile.order, order)

@@ -1,4 +1,22 @@
 ---
+names:
+  characters:
+    - Dallas
+    - Jacob
+    - Kathy Jones
+    - Sally
+    - Winchester Mason
+  places:
+    - Happenstance Ridge
+    - Tottle Town
+  things:
+    - cheddar house
+    - quick zapper
+  invalid:
+    - cheddar castle
+    - Gerald
+    - Happenstance Plateau
+    - Yates
 compile:
   order:
     - title.proze
