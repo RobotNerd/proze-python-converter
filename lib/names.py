@@ -16,5 +16,10 @@ class Names(object):
         @rtype:  list
         @return: List of all invalid character names found on the line.
         """
-        raise NotImplementedError
-
+        found = []
+        line = line.lower()
+        if self.options.names.invalid:
+            for invalid in self.options.names.invalid:
+                if invalid.lower() in line:
+                    found.append(invalid)
+        return found
