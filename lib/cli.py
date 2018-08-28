@@ -19,6 +19,12 @@ def parse():
         help='The output format of the compiled document.'
     )
     parser.add_argument(
+        'output',
+        default='output',
+        type=str,
+        help='The name of the output file to generate.'
+    )
+    parser.add_argument(
         '--path',
         default=cwd,
         type=str,
