@@ -39,6 +39,23 @@ class TestComments(unittest.TestCase):
             comments.reset()
             self.assertEqual(comments.remove(line[0]), line[1])
 
+    def test_line_token(self):
+        """Normal usage of a line comment token."""
+        lines = [
+            [
+                'abcd ## The rest of the line is hidden',
+                'abcd',
+            ],
+            [
+                '## The entire line is hidden',
+                '',
+            ],
+        ]
+        comments = Comments()
+        for line in lines:
+            comments.reset()
+            self.assertEqual(comments.remove(line[0]), line[1])
+
     def test_multiple_blocks(self):
         """Test lines that have multiple block comments."""
         lines = [
@@ -74,7 +91,6 @@ class TestComments(unittest.TestCase):
 
 
 # TODO test cases
-#   - block comment hiding line comment
 #   - block comment from previous line
 #       - current line entirely commented out by blokc
 #       - block comment ends on current line
