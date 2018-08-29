@@ -80,7 +80,25 @@ class TestComments(unittest.TestCase):
                 [
                     'abcd ### inside block comment',
                     'abcd',
+                ],
+                [
+                    'inside block comment ### efg',
+                    'efg',
                 ]
+            ],
+            [
+                [
+                    'abcd',
+                    'abcd',
+                ],
+                [
+                    'abcd ### inside block comment',
+                    'abcd',
+                ],
+                [
+                    'inside block comment',
+                    '',
+                ],
                 [
                     'inside block comment ### efg',
                     'efg',
