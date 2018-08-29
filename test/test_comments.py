@@ -5,8 +5,25 @@ import unittest
 
 class TestComments(unittest.TestCase):
 
+    def test_block_hides_line(self):
+        """A line comment token is hidden by a block token."""
+        lines = [
+            [
+                'abcd ### test of hidden ## token ### ef',
+                'abcd  ef',
+            ],
+            [
+                'abcd ### test of hidden ## token',
+                'abcd',
+            ],
+        ]
+        comments = Comments()
+        for line in lines:
+            comments.reset()
+            self.assertEqual(comments.remove(line[0]), line[1])
+
     def test_line_hides_block(self):
-        """A block comment is hidden by a line comment."""
+        """A block comment token is hidden by a line token."""
         lines = [
             [
                 'abcd ## test of ### hidden block ### comment token',
