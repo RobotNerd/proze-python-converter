@@ -73,6 +73,26 @@ class TestComments(unittest.TestCase):
             comments.reset()
             self.assertEqual(comments.remove(line[0]), line[1])
 
+    def test_block_wrapping(self):
+        """Test a block comment wrapping across multiple lines."""
+        cases = [
+            [
+                [
+                    'abcd ### inside block comment',
+                    'abcd',
+                ]
+                [
+                    'inside block comment ### efg',
+                    'efg',
+                ]
+            ],
+        ]
+        comments = Comments()
+        for lines in cases:
+            comments.reset()
+            for line in lines:
+                self.assertEqual(comments.remove(line[0]), line[1])
+
     def test_line_hides_block(self):
         """A block comment token is hidden by a line token."""
         lines = [
