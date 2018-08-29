@@ -12,6 +12,10 @@ class TestComments(unittest.TestCase):
                 'abcd ### hidden ###### also hidden ### ef',
                 'abcd  ef',
             ],
+            [
+                'abcd### hidden ###ef',
+                'abcdef',
+            ],
         ]
         comments = Comments()
         for line in lines:
