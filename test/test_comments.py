@@ -104,6 +104,38 @@ class TestComments(unittest.TestCase):
                     ' efg',
                 ]
             ],
+            [
+                [
+                    'abcd ### inside block comment',
+                    'abcd ',
+                ],
+                [
+                    'this is all ## inside block comment',
+                    '',
+                ],
+                [
+                    'inside block comment ### efg',
+                    ' efg',
+                ]
+            ],
+            [
+                [
+                    'abcd ## this will not start ### a block comment',
+                    'abcd ',
+                ],
+                [
+                    'abcd ### inside block comment',
+                    'abcd ',
+                ],
+                [
+                    'this is all ## inside block comment',
+                    '',
+                ],
+                [
+                    'inside block comment ### efg',
+                    ' efg',
+                ]
+            ],
         ]
         comments = Comments()
         for lines in cases:
