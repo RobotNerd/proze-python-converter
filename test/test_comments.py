@@ -5,8 +5,29 @@ import unittest
 
 class TestComments(unittest.TestCase):
 
+    def test_block(self):
+        """Normal usage of a block comment."""
+        lines = [
+            [
+                'abcd ### hidden ### efg',
+                'abcd  efg',
+            ],
+            [
+                '### hidden ###',
+                '',
+            ],
+            [
+                '  ### hidden ###  ',
+                '',
+            ],
+        ]
+        comments = Comments()
+        for line in lines:
+            comments.reset()
+            self.assertEqual(comments.remove(line[0]), line[1])
+
     def test_block_no_spacing(self):
-        """Test block tokens without spacing between them."""
+        """Block tokens without spacing between them."""
         lines = [
             [
                 'abcd ### hidden ###### also hidden ### ef',
@@ -31,6 +52,19 @@ class TestComments(unittest.TestCase):
             ],
             [
                 'abcd ### test of hidden ## token',
+                'abcd',
+            ],
+        ]
+        comments = Comments()
+        for line in lines:
+            comments.reset()
+            self.assertEqual(comments.remove(line[0]), line[1])
+
+    def test_block_line_adjacent(self):
+        """A line comment is adjacent to the ending block comment."""
+        lines = [
+            [
+                'abcd ### test of hidden ##### and this is hidden too',
                 'abcd',
             ],
         ]
@@ -64,6 +98,10 @@ class TestComments(unittest.TestCase):
                 'abcd',
             ],
             [
+                'abcd ##',
+                'abcd',
+            ],
+            [
                 '## The entire line is hidden',
                 '',
             ],
@@ -74,7 +112,7 @@ class TestComments(unittest.TestCase):
             self.assertEqual(comments.remove(line[0]), line[1])
 
     def test_multiple_blocks(self):
-        """Test lines that have multiple block comments."""
+        """Lines that have multiple block comments."""
         lines = [
             [
                 'a ### test ### b ### test ### c',
@@ -95,7 +133,7 @@ class TestComments(unittest.TestCase):
             self.assertEqual(comments.remove(line[0]), line[1])
 
     def test_no_comment(self):
-        """Test a proze line that doesn't have any comments."""
+        """A line that doesn't have any comments."""
         lines = [
             '"Furthermore," she said, "I would never take a deal like that."',
             'Use the hashtag #withoutHoldings on that post.',
@@ -109,10 +147,5 @@ class TestComments(unittest.TestCase):
 
 # TODO test cases
 #   - block comment from previous line
-#       - current line entirely commented out by blokc
+#       - current line entirely commented out by block
 #       - block comment ends on current line
-#   - block comment continuing onto next line
-#   - line comment first thing on the line
-#   - line comment last thing on the line
-#   - block comment takes up entire line
-#   - more than 3 adjacent # characters (e.g. ######)
