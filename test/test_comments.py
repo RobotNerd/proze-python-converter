@@ -18,7 +18,7 @@ class TestComments(unittest.TestCase):
             ],
             [
                 '  ### hidden ###  ',
-                '',
+                '    ',
             ],
         ]
         comments = Comments()
@@ -52,7 +52,7 @@ class TestComments(unittest.TestCase):
             ],
             [
                 'abcd ### test of hidden ## token',
-                'abcd',
+                'abcd ',
             ],
         ]
         comments = Comments()
@@ -65,7 +65,7 @@ class TestComments(unittest.TestCase):
         lines = [
             [
                 'abcd ### test of hidden ##### and this is hidden too',
-                'abcd',
+                'abcd ',
             ],
         ]
         comments = Comments()
@@ -79,11 +79,11 @@ class TestComments(unittest.TestCase):
             [
                 [
                     'abcd ### inside block comment',
-                    'abcd',
+                    'abcd ',
                 ],
                 [
                     'inside block comment ### efg',
-                    'efg',
+                    ' efg',
                 ]
             ],
             [
@@ -93,7 +93,7 @@ class TestComments(unittest.TestCase):
                 ],
                 [
                     'abcd ### inside block comment',
-                    'abcd',
+                    'abcd ',
                 ],
                 [
                     'inside block comment',
@@ -101,7 +101,7 @@ class TestComments(unittest.TestCase):
                 ],
                 [
                     'inside block comment ### efg',
-                    'efg',
+                    ' efg',
                 ]
             ],
         ]
@@ -116,11 +116,11 @@ class TestComments(unittest.TestCase):
         lines = [
             [
                 'abcd ## test of ### hidden block ### comment token',
-                'abcd',
+                'abcd ',
             ],
             [
                 'abcd ## test of ### hidden block comment token',
-                'abcd',
+                'abcd ',
             ],
         ]
         comments = Comments()
@@ -133,15 +133,19 @@ class TestComments(unittest.TestCase):
         lines = [
             [
                 'abcd ## The rest of the line is hidden',
-                'abcd',
+                'abcd ',
             ],
             [
                 'abcd ##',
-                'abcd',
+                'abcd ',
             ],
             [
                 '## The entire line is hidden',
                 '',
+            ],
+            [
+                ' ## The entire line is hidden',
+                ' ',
             ],
         ]
         comments = Comments()
@@ -158,11 +162,11 @@ class TestComments(unittest.TestCase):
             ],
             [
                 'a ### test ### bcde ### f g ###',
-                'a  bcde',
+                'a  bcde ',
             ],
             [
                 'a ### test ### bcde ### f g',
-                'a  bcde',
+                'a  bcde ',
             ],
         ]
         comments = Comments()
@@ -181,9 +185,3 @@ class TestComments(unittest.TestCase):
         comments = Comments()
         for line in lines:
             self.assertEqual(comments.remove(line), line)
-
-
-# TODO test cases
-#   - block comment from previous line
-#       - current line entirely commented out by block
-#       - block comment ends on current line

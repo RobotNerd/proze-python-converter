@@ -76,7 +76,7 @@ class Comments(object):
                 if not self._in_comment_block:
                     result = result + right
                 right = None
-        return result.strip()
+        return result
 
     def reset(self):
         """Clear state values."""
