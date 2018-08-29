@@ -5,6 +5,19 @@ import unittest
 
 class TestComments(unittest.TestCase):
 
+    def test_block_no_spacing(self):
+        """Test block tokens without spacing between them."""
+        lines = [
+            [
+                'abcd ### hidden ###### also hidden ### ef',
+                'abcd  ef',
+            ],
+        ]
+        comments = Comments()
+        for line in lines:
+            comments.reset()
+            self.assertEqual(comments.remove(line[0]), line[1])
+
     def test_block_hides_line(self):
         """A line comment token is hidden by a block token."""
         lines = [
