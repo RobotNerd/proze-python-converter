@@ -56,8 +56,10 @@ class TestNames(unittest.TestCase):
         state.is_chapter = False
         state.is_section = False
         self.assertEqual(rules.first_character(state), '')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '')
         rules.options.compile.paragraph.mode = 'justified'
         self.assertEqual(rules.first_character(state), '')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '')
 
     def test_first_character_not_first_paragraph(self):
         """Insert a tab if it isn't the first paragraph."""
@@ -68,8 +70,10 @@ class TestNames(unittest.TestCase):
         state.is_chapter = False
         state.is_section = False
         self.assertEqual(rules.first_character(state), '\t')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '    ')
         rules.options.compile.paragraph.mode = 'justified'
         self.assertEqual(rules.first_character(state), '')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '')
 
     def test_first_character_not_first_line(self):
         """Don't insert a tab if the previous line isn't blank."""
@@ -80,8 +84,10 @@ class TestNames(unittest.TestCase):
         state.is_chapter = False
         state.is_section = False
         self.assertEqual(rules.first_character(state), '')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '')
         rules.options.compile.paragraph.mode = 'justified'
         self.assertEqual(rules.first_character(state), '')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '')
 
     def test_first_character_chapter(self):
         """Insert a tab for first paragraph of a chapter."""
@@ -92,8 +98,10 @@ class TestNames(unittest.TestCase):
         state.is_chapter = True
         state.is_section = False
         self.assertEqual(rules.first_character(state), '\t')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '    ')
         rules.options.compile.paragraph.mode = 'justified'
         self.assertEqual(rules.first_character(state), '')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '')
 
     def test_first_character_section(self):
         """Insert a tab for first paragraph of a section."""
@@ -104,5 +112,7 @@ class TestNames(unittest.TestCase):
         state.is_chapter = False
         state.is_section = True
         self.assertEqual(rules.first_character(state), '\t')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '    ')
         rules.options.compile.paragraph.mode = 'justified'
         self.assertEqual(rules.first_character(state), '')
+        self.assertEqual(rules.first_character(state, use_spaces=True), '')
