@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from lib.comments import Comments
 from lib.names import Names
+from lib.state import State
 from strategy.text import TextStrategy
 import lib.cli
 import lib.config
@@ -59,18 +60,21 @@ def execute_strategy(strategy, args, options):
     """
     comments = Comments()
     # TODO strip brackets
+    state = State()
     output_path = args.output + '.' + args.doctype
     with strategy.compile(output_path) as compiler:
         for path in options.compile.order:
             with open(path, 'r') as proze_file:
                 comments.reset()
+                state.reset()
                 line_number = 0
                 for line in proze_file:
                     line_number = line_number + 1
                     line = comments.remove(line)
                     check_invalid_names(line, path, line_number)
                     if line:
-                        compiler.write(line)
+                        compiler.write(line, state)
+                    state.update(line) # TODO parsed or raw version of line?
 
 
 def run():

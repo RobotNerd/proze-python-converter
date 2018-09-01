@@ -48,27 +48,22 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         """Close the open file handle."""
         self.handle.close()
 
-    # TODO replace kwargs by creating a state object
-    def _format(self, line, **kwargs):
+    def _format(self, line, state):
         """Format the line of text for the target document type.
         @type  line: str
         @param line: Proze formatted line to be written to the document.
-        @param kwargs: Formatting state flags applied to this line of text.
-            - bold: If True, bold is applied from the previous line.
-            - italics: If True, italics is applied from the previous line.
-            - is_first_paragraph: True if this is the first paragraph in
-                the current chapter or section.
-            - is_previous_line_blank: True if previous line in the proze
-                file contains only whitespace.
+        @type  state: lib.state.State
+        @param state: Formatting state of the current line of text.
+        @rtype:  str
         @return: Formatted line for insertion into the document.
         """
         line = self.rules.clean_whitespace(line)
-        line = self.rules.first_character(**kwargs) + line
+        line = self.rules.first_character(state, use_spaces=True) + line
         line = self._strip_bold_italics(line)
         # TODO remove markup tags (Title, Chapter, etc)
         return line
 
-    def _strip_bold_italic(self, line):
+    def _strip_bold_italics(self, line):
         """Remove bold and italic markup.
         @type  line: str
         @param line: Proze formatted line to be written to the document.
@@ -79,9 +74,12 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         line = re.sub('__', '', line)
         return line
 
-    def write(self, line):
+    def write(self, line, state):
         """Write a line of text to the output document.
+        @type  line: str
         @param line: Formatted line to be written to the document.
+        @type  state: lib.state.State
+        @param state: Formatting state of the current line of text.
         """
-        self.handle.write(line)
+        self.handle.write(self._format(line, state))
 
