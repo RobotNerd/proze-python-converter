@@ -1,5 +1,9 @@
 import re
 
+# Number of spaces to use per tab.
+SPACES_PER_TAB = 4
+
+
 class Rules(object):
 
     """Formatting rules."""
@@ -21,28 +25,41 @@ class Rules(object):
         line = line.strip()
         return re.sub(r'\s+', ' ', line)
 
-    def first_character(self, **kwargs):
-        """Character(s) to insert at the beginning of the paragraph.
+    def first_character(self, state, use_spaces=False):
+        """Get character(s) to insert at the beginning of the paragraph.
         It can be an empty string if no characters should be inserted.
-        @type  kwargs: dict
-        @param kwargs: Formatting state flags applied to this line of text.
+
+        @type  state: lib.state.State
+        @param state: Current state of document compilation.
+        @type  use_spaces: bool
+        @param use_spaces: If True, return spaces instead of tabs.
         @rtype:  str
         @return: Characters to be inserted.
         """
         to_insert = ''
         add_tab = False
-        if kwargs.get('is_previous_line_blank'):
+        if self.options.compile.paragraph.mode == 'prose':
             add_tab = True
-        elif kwargs.get('is_first_paragraph'):
-            if self.options.paragraph.tabFirstParagraph == 'always':
-                add_tab = True
-            elif self.options.paragraph.tabFirstParagraph == 'chapter':
-                if kwargs.get('is_chapter'):
+            if not state.is_previous_line_blank:
+                add_tab = False
+            elif state.is_first_paragraph:
+                add_tab = False
+                if (
+                    state.is_chapter and
+                    self.options.compile.paragraph.tabFirst.chapter
+                ):
                     add_tab = True
-            elif self.options.paragraph.tabFirstParagraph == 'section':
-                if kwargs.get('is_section'):
+                elif (
+                    state.is_section and
+                    self.options.compile.paragraph.tabFirst.section
+                ):
+                    add_tab = True
+                elif self.options.compile.paragraph.tabFirst.title:
                     add_tab = True
         if add_tab:
-            to_insert = "\t"
+            if use_spaces:
+                to_insert = " " * SPACES_PER_TAB
+            else:
+                to_insert = "\t"
         return to_insert
 

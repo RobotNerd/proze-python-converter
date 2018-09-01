@@ -48,6 +48,7 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         """Close the open file handle."""
         self.handle.close()
 
+    # TODO replace kwargs by creating a state object
     def _format(self, line, **kwargs):
         """Format the line of text for the target document type.
         @type  line: str
