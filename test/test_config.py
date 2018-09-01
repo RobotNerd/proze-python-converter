@@ -15,8 +15,11 @@ class TestConfigLoader(unittest.TestCase):
         args = DotMap()
         args.path = paths.dark_and_stormy
         options = lib.config.load(args)
-        self.assertEqual(options.compile.paragraph.tabFirstParagraph, 'always')
-        self.assertEqual(options.compile.paragraph.removeBlankLines, 'never')
+        self.assertEqual(options.compile.paragraph.mode, 'prose')
+        self.assertFalse(options.compile.paragraph.tabFirst.title)
+        self.assertTrue(options.compile.paragraph.tabFirst.chapter)
+        self.assertTrue(options.compile.paragraph.tabFirst.section)
+        self.assertFalse(options.compile.paragraph.removeBlankLines)
         self.assertEqual(options.compile.spacing, 'double')
 
     def test_names(self):
@@ -54,6 +57,14 @@ class TestConfigLoader(unittest.TestCase):
         self.assertEqual(options.names.places, [])
         self.assertEqual(options.names.things, [])
         self.assertEqual(options.names.invalid, [])
+
+        # Default compile options should be used.
+        self.assertEqual(options.compile.paragraph.mode, 'prose')
+        self.assertFalse(options.compile.paragraph.tabFirst.title)
+        self.assertFalse(options.compile.paragraph.tabFirst.chapter)
+        self.assertFalse(options.compile.paragraph.tabFirst.section)
+        self.assertTrue(options.compile.paragraph.removeBlankLines)
+        self.assertEqual(options.compile.spacing, 'single')
 
     def test_order_from_config(self):
         """Test globbing files based on config file."""

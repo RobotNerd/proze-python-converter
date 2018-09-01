@@ -19,8 +19,11 @@ def _default(args):
     options.names.things = []
     options.names.invalid = []
     options.compile.order = _find_proze_files(args)
-    options.compile.paragraph.tabFirstParagraph = 'never'
-    options.compile.paragraph.removeBlankLines = 'always'
+    options.compile.paragraph.mode = 'prose'
+    options.compile.paragraph.removeBlankLines = True
+    options.compile.paragraph.tabFirst.chapter = False
+    options.compile.paragraph.tabFirst.section = False
+    options.compile.paragraph.tabFirst.title = False
     options.compile.spacing = 'single'
     return options
 
@@ -149,22 +152,34 @@ def _parse_paragraph_options(parsed, options):
     @type  options: DotMap
     @param options: Data structure where options are stored.
     """
-    valid_blank = ['always', 'never']
-    valid_tab = ['always', 'chapter', 'never', 'section']
-    compiler = parsed.get('compile')
-    if compiler:
-        paragraph = compiler.get('paragraph')
+    valid_modes = ['justified', 'prose']
+    compile_opts = parsed.get('compile')
+    if compile_opts:
+        paragraph = compile_opts.get('paragraph')
         if paragraph:
-            blank = paragraph.get('removeBlankLines')
-            if blank:
-                blank = blank.lower()
-                if blank in valid_blank:
-                    options.compile.paragraph.removeBlankLines = blank
-            tab = paragraph.get('tabFirstParagraph')
-            if tab:
-                tab = tab.lower()
-                if tab in valid_tab:
-                    options.compile.paragraph.tabFirstParagraph = tab
+            options.compile.paragraph.removeBlankLines = _validate_bool(
+                paragraph.get('removeBlankLines'),
+                options.compile.paragraph.removeBlankLines
+            )
+            options.compile.paragraph.mode = _validate_string(
+                paragraph.get('mode'),
+                valid_modes,
+                options.compile.paragraph.mode
+            )
+            tabFirst = paragraph.get('tabFirst')
+            if tabFirst:
+                options.compile.paragraph.tabFirst.chapter = _validate_bool(
+                    tabFirst.get('chapter'),
+                    options.compile.paragraph.tabFirst.chapter
+                )
+                options.compile.paragraph.tabFirst.title = _validate_bool(
+                    tabFirst.get('title'),
+                    options.compile.paragraph.tabFirst.title
+                )
+                options.compile.paragraph.tabFirst.section = _validate_bool(
+                    tabFirst.get('section'),
+                    options.compile.paragraph.tabFirst.section
+                )
 
 
 def _parse_spacing(parsed, options):
@@ -182,3 +197,36 @@ def _parse_spacing(parsed, options):
             spacing = spacing.lower()
             if spacing in valid:
                 options.compile.spacing = spacing
+
+
+def _validate_bool(value, default):
+    """Validate a boolean value parsed from the config file.
+    @type  value: any
+    @param value: Raw value read from config.
+    @type  default: bool
+    @param default: Default value to use if the input value isn't valid.
+    @rtype:  bool
+    @return: Value to use.
+    """
+    if value is not None:
+        if type(value) is bool:
+            return value
+    return default
+
+
+def _validate_string(value, valid_values, default):
+    """Validate a string value parsed from the config file.
+    @type  value: str
+    @param value: Raw value read from config.
+    @type  valid_values: list
+    @param valid_values: Allowed values.
+    @type  default: str
+    @param default: Default value to use if the input value isn't valid.
+    @rtype:  str
+    @return: Value to use.
+    """
+    if value:
+        value = value.lower()
+        if value in valid_values:
+            return value
+    return default
