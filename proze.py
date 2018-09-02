@@ -58,19 +58,23 @@ def execute_strategy(strategy, args, options):
     @type  options: DotMap
     @param options: Compile options parsed from the config file.
     """
+    brackets = Brackets()
     comments = Comments()
-    # TODO strip brackets
+    # TODO comments should be aware of brackets
+    #   - don't recognize a comment if it's inside a bracket block
     state = State()
     output_path = args.output + '.' + args.doctype
     with strategy.compile(output_path) as compiler:
         for path in options.compile.order:
             with open(path, 'r') as proze_file:
                 comments.reset()
+                brackets.reset
                 state.reset()
                 line_number = 0
                 for line in proze_file:
                     line_number = line_number + 1
-                    line = comments.remove(line)
+                    line = comments.remove(line) # TODO make bracket aware
+                    line = brackets.remove(line)
                     check_invalid_names(line, path, line_number)
                     if line:
                         compiler.write(line, state)
