@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class BaseStrategy(ABC):
 
     """Base class for all document conversion strategies.
-    
+
     This class is separate from the actual converter class so that
     the strategy can be chosen without triggering the __enter__
     method.
@@ -74,4 +74,3 @@ class BaseStrategyCompiler(ABC):
         @param line: Formatted line to be written to the document.
         """
         pass
-

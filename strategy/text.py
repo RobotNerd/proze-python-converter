@@ -82,4 +82,3 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @param state: Formatting state of the current line of text.
         """
         self.handle.write(self._format(line, state))
-

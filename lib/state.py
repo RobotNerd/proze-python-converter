@@ -12,7 +12,7 @@ class State(object):
         # True if currently in the first paragraph after a title,
         # chapter, or section tag.
         self.is_first_paragraph = None
-        
+
         # True if italics is carried over from a previous line.
         self.is_italics = None
 

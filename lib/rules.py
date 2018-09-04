@@ -62,4 +62,3 @@ class Rules(object):
             else:
                 to_insert = "\t"
         return to_insert
-

@@ -46,7 +46,7 @@ class TestNames(unittest.TestCase):
         ]
         for line in lines:
             self.assertEqual(rules.clean_whitespace(line[0]), line[1])
-    
+
     def test_first_character_title(self):
         """Don't insert tab in first paragraph in the story."""
         rules = self._create_rules_prose_first_char()
