@@ -1,5 +1,4 @@
 from dotmap import DotMap
-import lib.config
 import os
 import proze
 import test.expected_text as expected
