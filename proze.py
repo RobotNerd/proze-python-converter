@@ -51,7 +51,7 @@ def determine_strategy(args, options):
 
 
 def execute_strategy(strategy, args, options):
-    """Compile the proze project using the stragegy.
+    """Compile the proze project using the strategy.
     @type  strategy: BaseStrategy
     @param strategy: Strategy to use.
     @type  args: object
@@ -65,7 +65,8 @@ def execute_strategy(strategy, args, options):
     output_path = args.output + '.' + args.doctype
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with strategy.compile(output_path) as compiler:
-        for path in options.compile.order:
+        for filename in options.compile.order:
+            path = args.path + '/' + filename
             try:
                 with open(path, 'r') as proze_file:
                     blocks.reset()

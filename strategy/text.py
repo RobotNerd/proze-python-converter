@@ -43,6 +43,7 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
     def __enter__(self):
         """Create and open a new document."""
         self.handle = open(self.path, 'w')
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """Close the open file handle."""
@@ -70,7 +71,7 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @rtype:  str
         @return: Line after bold and italic markup is removed.
         """
-        line = re.sub('*', '', line)
+        line = re.sub('\*', '', line)
         line = re.sub('__', '', line)
         return line
 
