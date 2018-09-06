@@ -5,14 +5,12 @@ from strategy.text import TextStrategy
 import lib.cli
 import lib.config
 
-names = Names()
-
 
 class StrategyNotFoundError(Exception):
     pass
 
 
-def check_invalid_names(line, path, line_number):
+def check_invalid_names(line, path, line_number, names):
     """Check the line and warn if it contains invalid names.
     @type  line: str
     @param line: Proze formatted line.
@@ -20,6 +18,8 @@ def check_invalid_names(line, path, line_number):
     @param path: Path to the proze file being parsed.
     @type  line_number: number
     @param line_number: Current line number in the file being parsed.
+    @type  names: lib.names.Names
+    @param names: Methods for managing character names.
     """
     invalid = names.find_invalid(line)
     if invalid:
@@ -58,6 +58,7 @@ def execute_strategy(strategy, args, options):
     @param options: Compile options parsed from the config file.
     """
     blocks = Blocks()
+    names = names(options)
     state = State()
     output_path = args.output + '.' + args.doctype
     with strategy.compile(output_path) as compiler:
@@ -69,16 +70,18 @@ def execute_strategy(strategy, args, options):
                 for line in proze_file:
                     line_number = line_number + 1
                     line = blocks.remove(line)
-                    check_invalid_names(line, path, line_number)
+                    check_invalid_names(line, path, line_number, names)
                     if line:
                         compiler.write(line, state)
                     state.update(line)  # TODO parsed or raw version of line?
 
 
-def run():
-    """Compile proze to target format."""
-    args = lib.cli.parse()
-    options = lib.config.load()
+def run(args):
+    """Compile proze to target format.
+    @type  args: object
+    @param args: Parsed command line args.
+    """
+    options = lib.config.load(args)
     if not options.compile.order:
         print('No proze files to compile.')
     else:
@@ -87,4 +90,5 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    args = lib.cli.parse()
+    run(args)

@@ -1,4 +1,4 @@
-from base import BaseStrategy, BaseStrategyCompiler
+from strategy.base import BaseStrategy, BaseStrategyCompiler
 from lib.rules import Rules
 import re
 
@@ -14,7 +14,7 @@ class TextStrategy(BaseStrategy):
         """
         self.options = options
 
-    def compile(self):
+    def compile(self, path):
         """Compile the project.
         @type  path: str
         @param path: Path of the output file to be generated.

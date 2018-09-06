@@ -13,13 +13,13 @@ def parse():
         'doctype',
         choices=[
             'pdf',
-            'text',
+            'txt',
         ],
         type=str,
         help='The output format of the compiled document.'
     )
     parser.add_argument(
-        'output',
+        '--output',
         default='output',
         type=str,
         help='The name of the output file to generate.'
