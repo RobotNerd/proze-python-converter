@@ -1,0 +1,15 @@
+---
+names:
+  characters:
+    - Mr. Nobody
+  places:
+    - No Place
+  things:
+    - nothing
+  invalid:
+    - something
+compile:
+  order:
+    - no-title.proze
+    - not-there.proze
+    - missing-files.proze

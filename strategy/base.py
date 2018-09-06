@@ -68,7 +68,7 @@ class BaseStrategyCompiler(ABC):
         pass
 
     @abstractmethod
-    def write_line(self, line):
+    def write(self, line):
         """Write a line of text to the output document.
         @type  line: str
         @param line: Formatted line to be written to the document.

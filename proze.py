@@ -1,9 +1,11 @@
 #!/usr/bin/python3
+from lib.blocks import Blocks
 from lib.names import Names
 from lib.state import State
 from strategy.text import TextStrategy
 import lib.cli
 import lib.config
+import os
 
 
 class StrategyNotFoundError(Exception):
@@ -41,7 +43,7 @@ def determine_strategy(args, options):
     """
     if args.doctype == 'pdf':
         raise NotImplementedError
-    elif args.doctype == 'text':
+    elif args.doctype == 'txt':
         return TextStrategy(options)
     raise StrategyNotFoundError(
         'Unrecognized strategy {}'.format(args.doctype)
@@ -58,22 +60,30 @@ def execute_strategy(strategy, args, options):
     @param options: Compile options parsed from the config file.
     """
     blocks = Blocks()
-    names = names(options)
+    names = Names(options)
     state = State()
     output_path = args.output + '.' + args.doctype
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with strategy.compile(output_path) as compiler:
         for path in options.compile.order:
-            with open(path, 'r') as proze_file:
-                blocks.reset()
-                state.reset()
-                line_number = 0
-                for line in proze_file:
-                    line_number = line_number + 1
-                    line = blocks.remove(line)
-                    check_invalid_names(line, path, line_number, names)
-                    if line:
-                        compiler.write(line, state)
-                    state.update(line)  # TODO parsed or raw version of line?
+            try:
+                with open(path, 'r') as proze_file:
+                    blocks.reset()
+                    state.reset()
+                    line_number = 0
+                    for line in proze_file:
+                        line_number = line_number + 1
+                        line = blocks.remove(line)
+                        check_invalid_names(line, path, line_number, names)
+                        if line:
+                            compiler.write(line, state)
+                        # TODO parsed or raw version of line?
+                        state.update(line)
+            except FileNotFoundError:
+                print(
+                    'MISSING: Cannot find file "{}". '.format(path) +
+                    'Update the file names in your config file.'
+                )
 
 
 def run(args):
@@ -85,7 +95,7 @@ def run(args):
     if not options.compile.order:
         print('No proze files to compile.')
     else:
-        strategy = determine_strategy(options)
+        strategy = determine_strategy(args, options)
         execute_strategy(strategy, args, options)
 
 
