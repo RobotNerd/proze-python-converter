@@ -4,15 +4,23 @@ import os
 import proze
 import unittest
 
+PATH = 'test/sample/tmp/output.txt'
+
 
 class TestEmpty(unittest.TestCase):
+
+    def setUp(self):
+        try:
+            os.remove(PATH)
+        except OSError:
+            pass
 
     def test_compile_empty(self):
         """A project with no config/proze files generates nothing."""
         args = DotMap()
         args.doctype = 'txt'
-        args.output = 'test/sample/tmp/output'
+        args.output = PATH[:-4]
         args.path = 'test/sample/no_data'
         proze.run(args)
-        self.assertFalse(os.path.isfile(args.output + '.txt'))
+        self.assertFalse(os.path.isfile(PATH))
 
