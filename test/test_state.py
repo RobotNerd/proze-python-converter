@@ -41,6 +41,15 @@ class TestState(unittest.TestCase):
         state.update('Section: test')
         self.assertTrue(state.is_section)
         self.assertFalse(state.is_chapter)
+        state.update('---')
+        self.assertTrue(state.is_section)
+        self.assertFalse(state.is_chapter)
+        state.update('Chapter:')
+        self.assertFalse(state.is_section)
+        self.assertTrue(state.is_chapter)
+        state.update('---stuff')
+        self.assertFalse(state.is_section)
+        self.assertTrue(state.is_chapter)
 
     def test_first_paragraph(self):
         """Flag first line of the first paragraph.
@@ -80,3 +89,12 @@ class TestState(unittest.TestCase):
         self.assertTrue(state.is_first_paragraph)
         state.update(proze_line)
         self.assertFalse(state.is_first_paragraph)
+
+    def test_bold_wrapping(self):
+        """Bold formatting wraps from the previous line."""
+        state = lib.state.State()
+        self.assertFalse(state.is_bold)
+        state.update('__test__')
+        self.assertFalse(state.is_bold)
+        state.update('__test__ and __ test')
+        self.assertTrue(state.is_bold)
