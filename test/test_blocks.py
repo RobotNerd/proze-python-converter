@@ -280,6 +280,18 @@ class TestBlocks(unittest.TestCase):
                 r'abcd \### efg',
                 r'abcd \### efg',
             ],
+            [
+                r'abcd \### efg ## test',
+                r'abcd \### efg ',
+            ],
+            [
+                r'abcd \### efg ### test \### test ### hij',
+                r'abcd \### efg  hij',
+            ],
+            [
+                r'abcd \### efg ### test \### test \## ### hij',
+                r'abcd \### efg  hij',
+            ],
         ]
         blocks = Blocks()
         for line in lines:

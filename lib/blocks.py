@@ -1,9 +1,18 @@
+from dotmap import DotMap
 import re
 
-BLOCK_TOKEN = '###'
-LINE_TOKEN = '##'
-BRACKET_OPEN = '['
-BRACKET_CLOSE = ']'
+tkn = DotMap()
+tkn.comment.block = '###'
+tkn.comment.line = '##'
+tkn.bracket.open = '['
+tkn.bracket.close = ']'
+
+regex = {
+    '###': re.compile(r'^.*?(?<!\\)(###)'),
+    '##': re.compile(r'^.*?(?<!\\)(?<!\#)(##)'),
+    '[': re.compile(r'^.*?(?<!\\)(\[)'),
+    ']': re.compile(r'^.*?(?<!\\)(])'),
+}
 
 
 class RegexNotFound(Exception):
@@ -17,22 +26,6 @@ class Blocks(object):
     def __init__(self):
         self.in_bracket_block = False
         self.in_comment_block = False
-        self._regex = self._compile_regex()
-
-    def _compile_regex(self):
-        """Precompute regex patterns for each token type.
-        The pattern matches the first non-escaped token on the line.
-        @rtype:  dict
-        @return: Regex patterns to find first occurrence of a token.
-        """
-        result = {}
-        tokens = [ BLOCK_TOKEN, LINE_TOKEN, BRACKET_CLOSE ]
-        escape_tokens = [ BRACKET_OPEN ]
-        for token in tokens:
-            result[token] = re.compile(r'^.*?(?<!\\)({})'.format(token))
-        for token in escape_tokens:
-            result[token] = re.compile(r'^.*?(?<!\\)(\{})'.format(token))
-        return result
 
     def _get_index(self, line, token):
         """Get index of first occurrence of the token in the string.
@@ -44,7 +37,7 @@ class Blocks(object):
         @return: Index of the first token in the strong, None if not found.
         """
         index = None
-        prog = self._regex.get(token)
+        prog = regex.get(token)
         if prog is None:
             raise RegexNotFound('No regex found for token ' + str(token))
         match = prog.match(line)
@@ -61,33 +54,33 @@ class Blocks(object):
         """
         index = None
         token = None
-        index_line_comment = self._get_index(line, LINE_TOKEN)
-        index_block_comment = self._get_index(line, BLOCK_TOKEN)
-        index_bracket_open = self._get_index(line, BRACKET_OPEN)
-        index_bracket_close = self._get_index(line, BRACKET_CLOSE)
+        index_line_comment = self._get_index(line, tkn.comment.line)
+        index_block_comment = self._get_index(line, tkn.comment.block)
+        index_bracket_open = self._get_index(line, tkn.bracket.open)
+        index_bracket_close = self._get_index(line, tkn.bracket.close)
         if self.in_comment_block:
             # Everything is hidden up until the closing comment block token.
             index = index_block_comment
-            token = BLOCK_TOKEN
+            token = tkn.comment.block
         elif self.in_bracket_block:
             # Everything is hidden up until the closing bracket token.
             index = index_bracket_close
-            token = BRACKET_CLOSE
+            token = tkn.bracket.close
         else:
             # We're looking for the first token found on the line because
             # it will hide any subsequent tokens. The closing bracket is
             # ignored because it doesn't matter in this state.
             if index_line_comment is not None:
                 index = index_line_comment
-                token = LINE_TOKEN
+                token = tkn.comment.line
             if index_block_comment is not None:
                 if not index or index_block_comment <= index:
                     index = index_block_comment
-                    token = BLOCK_TOKEN
+                    token = tkn.comment.block
             if index_bracket_open is not None:
                 if not index or index_bracket_open < index:
                     index = index_bracket_open
-                    token = BRACKET_OPEN
+                    token = tkn.bracket.open
         return index, token
 
     def remove(self, line):
@@ -103,12 +96,12 @@ class Blocks(object):
             index, token = self._next_token(right)
             if index is not None:
                 if (
-                    token == BLOCK_TOKEN or
-                    token == BRACKET_OPEN or
-                    token == BRACKET_CLOSE
+                    token == tkn.comment.block or
+                    token == tkn.bracket.open or
+                    token == tkn.bracket.close
                 ):
                     left, right = right[0:index], right[index+len(token):]
-                    if token == BLOCK_TOKEN:
+                    if token == tkn.comment.block:
                         if not self.in_comment_block:
                             result = result + left
                         self.in_comment_block = not self.in_comment_block
