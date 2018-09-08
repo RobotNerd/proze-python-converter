@@ -11,6 +11,14 @@ class State(object):
     section_break = '---'
 
     def __init__(self):
+        # When true, the next line of proze is the first paragraph
+        # after a new title, chapter, or section.
+        self._find_first_paragraph = True
+
+        # Track the indentation level for block quotes.
+        self._indent_leading_whitespace = []
+        self._indent_level = 0
+
         # True if bold is carried over from a previous line.
         self.is_bold = None
 
@@ -21,10 +29,6 @@ class State(object):
         # chapter, or section tag.
         self.is_first_paragraph = None
 
-        # When true, the next line of proze is the first paragraph
-        # after a new title, chapter, or section.
-        self._find_first_paragraph = True
-
         # True if italics is carried over from a previous line.
         self.is_italics = None
 
@@ -33,6 +37,7 @@ class State(object):
 
         # True if inside a secton.
         self.is_section = None
+
         self.reset()
 
     def _is_markup(self, line):
@@ -49,8 +54,25 @@ class State(object):
             return self.section_break
         return None
 
+    def _process_blank_line(self, line):
+        """Update state if the line is blank.
+        Lines that contain only whitespace chars are considered to be blnak.
+        @type  line: str
+        @param line: Proze line.
+        @rtype:  bool
+        @return: True if the line is blank.
+        """
+        if line.strip() == '':
+            self.is_previous_line_blank = True
+            self.is_bold = False
+            self.is_italics = False
+            return True
+        return False
+
     def reset(self):
         """Reset all state values to default."""
+        self._indent_leading_whitespace = []
+        self._indent_level = 0
         self.is_bold = False
         self.is_chapter = False
         self.is_first_paragraph = False
@@ -68,22 +90,25 @@ class State(object):
         if line.count('*') % 2:
             self.is_italics = not self.is_italics
 
-    def _update_structural_markup_flags(self, token):
+    def _update_structural_markup_flags(self, line):
         """Update flags based on structural markup token.
         @type  token: str
         @param token: Structural markup token found on the line.
         """
-        if token != 'author:':
-            self._find_first_paragraph = True
-        if token == 'chapter:':
-            self.is_chapter = True
-            self.is_section = False
-        elif token == 'section:' or token == self.section_break:
-            self.is_chapter = False
-            self.is_section = True
-        else:
-            self.is_chapter = False
-            self.is_section = False
+        token = self._is_markup(line)
+        if token:
+            if token != 'author:':
+                self._find_first_paragraph = True
+            if token == 'chapter:':
+                self.is_chapter = True
+                self.is_section = False
+            elif token == 'section:' or token == self.section_break:
+                self.is_chapter = False
+                self.is_section = True
+            else:
+                self.is_chapter = False
+                self.is_section = False
+        return token is not None
 
     def update(self, line):
         """Update the document state based on the current line.
@@ -92,15 +117,8 @@ class State(object):
         """
         lowercase = line.lower()
         self.is_first_paragraph = False
-        if not line.strip():
-            self.is_previous_line_blank = True
-            self.is_bold = False
-            self.is_italics = False
-        else:
-            token = self._is_markup(lowercase)
-            if token:
-                self._update_structural_markup_flags(token)
-            else:
+        if not self._process_blank_line(line):
+            if not self._update_structural_markup_flags(lowercase):
                 if self._find_first_paragraph:
                     self._find_first_paragraph = False
                     self.is_first_paragraph = True
