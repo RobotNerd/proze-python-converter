@@ -252,6 +252,61 @@ class TestBlocks(unittest.TestCase):
             blocks.reset()
             self.assertEqual(blocks.remove(line[0]), line[1])
 
+    def test_escape_brackets(self):
+        """Bracket tokens aren't matched if they are escaped."""
+        lines = [
+            [
+                r'abcd \[ efg',
+                r'abcd \[ efg',
+            ],
+            [
+                r'abcd \[ efg [ this is hidden ]',
+                r'abcd \[ efg ',
+            ],
+            [
+                r'abcd \[ efg [ this is hidden \] hij ]',
+                r'abcd \[ efg ',
+            ],
+        ]
+        blocks = Blocks()
+        for line in lines:
+            blocks.reset()
+            self.assertEqual(blocks.remove(line[0]), line[1])
+
+    def test_escape_comment_block(self):
+        """Bracket tokens aren't matched if they are escaped."""
+        lines = [
+            [
+                r'abcd \### efg',
+                r'abcd \### efg',
+            ],
+        ]
+        blocks = Blocks()
+        for line in lines:
+            blocks.reset()
+            self.assertEqual(blocks.remove(line[0]), line[1])
+
+    def test_escape_comment_line(self):
+        """Bracket tokens aren't matched if they are escaped."""
+        lines = [
+            [
+                r'abcd \## efg',
+                r'abcd \## efg',
+            ],
+            [
+                r'abcd \## efg ## test',
+                r'abcd \## efg ',
+            ],
+            [
+                r'abcd ## efg ## test',
+                r'abcd ',
+            ],
+        ]
+        blocks = Blocks()
+        for line in lines:
+            blocks.reset()
+            self.assertEqual(blocks.remove(line[0]), line[1])
+
     def test_line_comment_hides_block_comment(self):
         """A block comment token is hidden by a line token."""
         lines = [

@@ -1,7 +1,13 @@
+import re
+
 BLOCK_TOKEN = '###'
 LINE_TOKEN = '##'
 BRACKET_OPEN = '['
 BRACKET_CLOSE = ']'
+
+
+class RegexNotFound(Exception):
+    pass
 
 
 class Blocks(object):
@@ -9,15 +15,27 @@ class Blocks(object):
     """Strip comments and bracket blocks from lines."""
 
     def __init__(self):
-        # Keep track of being inside block of text that is hidden via
-        # block comment tokens or brackets.
         self.in_bracket_block = False
         self.in_comment_block = False
+        self._regex = self._compile_regex()
+
+    def _compile_regex(self):
+        """Precompute regex patterns for each token type.
+        The pattern matches the first non-escaped token on the line.
+        @rtype:  dict
+        @return: Regex patterns to find first occurrence of a token.
+        """
+        result = {}
+        tokens = [ BLOCK_TOKEN, LINE_TOKEN, BRACKET_CLOSE ]
+        escape_tokens = [ BRACKET_OPEN ]
+        for token in tokens:
+            result[token] = re.compile(r'^.*?(?<!\\)({})'.format(token))
+        for token in escape_tokens:
+            result[token] = re.compile(r'^.*?(?<!\\)(\{})'.format(token))
+        return result
 
     def _get_index(self, line, token):
         """Get index of first occurrence of the token in the string.
-        Get around python's preference for throwing an exception instead of
-        returning None.
         @type  line: str
         @param line: Line of proze formatted text.
         @type  token: str
@@ -25,10 +43,13 @@ class Blocks(object):
         @rtype:  int
         @return: Index of the first token in the strong, None if not found.
         """
-        try:
-            index = line.index(token)
-        except ValueError:
-            index = None
+        index = None
+        prog = self._regex.get(token)
+        if prog is None:
+            raise RegexNotFound('No regex found for token ' + str(token))
+        match = prog.match(line)
+        if match:
+            index = match.start(1)
         return index
 
     def _next_token(self, line):
@@ -86,7 +107,7 @@ class Blocks(object):
                     token == BRACKET_OPEN or
                     token == BRACKET_CLOSE
                 ):
-                    left, right = right.split(token, 1)
+                    left, right = right[0:index], right[index+len(token):]
                     if token == BLOCK_TOKEN:
                         if not self.in_comment_block:
                             result = result + left
@@ -96,7 +117,7 @@ class Blocks(object):
                             result = result + left
                         self.in_bracket_block = not self.in_bracket_block
                 else:
-                    keep, _ = right.split(token, 1)
+                    keep, _ = right[0:index], right[index:]
                     right = None
                     result = result + keep
             else:
