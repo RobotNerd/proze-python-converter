@@ -1,3 +1,10 @@
+import re
+
+whitespace = re.compile(r'^(\s+)[^\s-]')
+
+# TODO consider renaming is_previous_line_blank to start_new_paragraph
+
+
 class State(object):
 
     """Track current state of document compilation."""
@@ -17,7 +24,7 @@ class State(object):
 
         # Track the indentation level for block quotes.
         self._indent_leading_whitespace = []
-        self._indent_level = 0
+        self.indent_level = 0
 
         # True if bold is carried over from a previous line.
         self.is_bold = None
@@ -66,18 +73,19 @@ class State(object):
             self.is_previous_line_blank = True
             self.is_bold = False
             self.is_italics = False
+            self.indent_level = 0
             return True
         return False
 
     def reset(self):
         """Reset all state values to default."""
         self._indent_leading_whitespace = []
-        self._indent_level = 0
+        self.indent_level = 0
         self.is_bold = False
         self.is_chapter = False
         self.is_first_paragraph = False
         self.is_italics = False
-        self.is_previous_line_blank = False
+        self.is_previous_line_blank = True
         self.is_section = False
     
     def _toggle_bold_and_italics(self, line):
@@ -90,6 +98,30 @@ class State(object):
         if line.count('*') % 2:
             self.is_italics = not self.is_italics
 
+    def _update_indentation_level(self, line):
+        """Update state of indented block quote paragraphs.
+        @type  line: str
+        @param line: Proze line.
+        """
+        if self.is_previous_line_blank:
+            current = whitespace.match(line)
+            if current:
+                current = current.group(1)
+                previous = ''
+                if self._indent_leading_whitespace:
+                    previous = self._indent_leading_whitespace[-1]
+                if len(previous) > len(current):
+                    self._indent_leading_whitespace.pop()
+                    self.indent_level = self.indent_level - 1
+                elif len(previous) < len(current):
+                    self._indent_leading_whitespace.append(current)
+                    self.indent_level = self.indent_level + 1
+            else:
+                self._indent_leading_whitespace = []
+                self.indent_level = 0
+        if self.indent_level < 0:
+                self.indent_level = 0
+
     def _update_structural_markup_flags(self, line):
         """Update flags based on structural markup token.
         @type  token: str
@@ -97,6 +129,7 @@ class State(object):
         """
         token = self._is_markup(line)
         if token:
+            self.is_previous_line_blank = True
             if token != 'author:':
                 self._find_first_paragraph = True
             if token == 'chapter:':
@@ -123,3 +156,5 @@ class State(object):
                     self._find_first_paragraph = False
                     self.is_first_paragraph = True
                 self._toggle_bold_and_italics(lowercase)
+                self._update_indentation_level(line)
+                self.is_previous_line_blank = False
