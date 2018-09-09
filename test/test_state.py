@@ -141,7 +141,7 @@ class TestState(unittest.TestCase):
         state.update('    a line of proze')
         self.assertEqual(state.indent_level, 1)
         state.update(' ')
-        self.assertEqual(state.indent_level, 0)
+        self.assertEqual(state.indent_level, 1)
         state.update('a line of proze')
         self.assertEqual(state.indent_level, 0)
         state.update(' ')
@@ -155,9 +155,23 @@ class TestState(unittest.TestCase):
         state.update('a line of proze')
         self.assertEqual(state.indent_level, 1)
         state.update('')
-        self.assertEqual(state.indent_level, 0)
+        self.assertEqual(state.indent_level, 1)
+        # This reverts to zero because it's an un-indent that goes negative.
         state.update('\t\ta line of proze')
         self.assertEqual(state.indent_level, 0)
         state.reset()
         state.update('a line of proze')
         self.assertEqual(state.indent_level, 0)
+
+    def test_indented_blockquote_multiple(self):
+        """A paragraph indented as a block quotes."""
+        state = lib.state.State()
+        self.assertEqual(state.indent_level, 0)
+        state.update('    a line of proze')
+        self.assertEqual(state.indent_level, 1)
+        state.update('    ')
+        state.update('        a line of proze')
+        self.assertEqual(state.indent_level, 2)
+        state.update('    ')
+        state.update('    a line of proze')
+        self.assertEqual(state.indent_level, 1)

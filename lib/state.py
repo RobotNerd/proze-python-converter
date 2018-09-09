@@ -73,7 +73,6 @@ class State(object):
             self.is_previous_line_blank = True
             self.is_bold = False
             self.is_italics = False
-            self.indent_level = 0
             return True
         return False
 
