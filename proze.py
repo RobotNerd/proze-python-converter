@@ -72,14 +72,14 @@ def execute_strategy(strategy, args, options):
                     blocks.reset()
                     state.reset()
                     line_number = 0
-                    for line in proze_file:
+                    for raw_line in proze_file:
                         line_number = line_number + 1
-                        line = blocks.remove(line)
+                        line = blocks.remove(raw_line)
                         check_invalid_names(line, path, line_number, names)
                         if line:
                             compiler.write(line, state)
                         # TODO parsed or raw version of line?
-                        state.update(line)
+                        state.update(raw_line)
             except FileNotFoundError:
                 print(
                     'MISSING: Cannot find file "{}". '.format(path) +
