@@ -67,7 +67,7 @@ class TestConfigLoader(unittest.TestCase):
         self.assertEqual(options.compile.spacing, 'single')
 
     def test_order_from_config(self):
-        """Test globbing files based on config file."""
+        """Test order of files based on config file."""
         order = [
             'title.proze',
             'erased.proze',
@@ -84,18 +84,18 @@ class TestConfigLoader(unittest.TestCase):
     def test_order_no_config(self):
         """Test globbing files for the file order if not in the config file."""
         order = [
-            'test/sample/feelings/conflict/cruise/bridge.proze',
-            'test/sample/feelings/conflict/cruise/cabin.proze',
-            'test/sample/feelings/conflict/cruise/deck.proze',
-            'test/sample/feelings/conflict/cruise/engine-room.proze',
-            'test/sample/feelings/conflict/dinner-party.proze',
-            'test/sample/feelings/conflict/forest.proze',
-            'test/sample/feelings/conflict/shopping.proze',
-            'test/sample/feelings/romance/at-the-lake.proze',
-            'test/sample/feelings/romance/blimp.proze',
-            'test/sample/feelings/romance/caverns.proze',
-            'test/sample/feelings/romance/rainstorm.proze',
-            'test/sample/feelings/title.proze',
+            'conflict/cruise/bridge.proze',
+            'conflict/cruise/cabin.proze',
+            'conflict/cruise/deck.proze',
+            'conflict/cruise/engine-room.proze',
+            'conflict/dinner-party.proze',
+            'conflict/forest.proze',
+            'conflict/shopping.proze',
+            'romance/at-the-lake.proze',
+            'romance/blimp.proze',
+            'romance/caverns.proze',
+            'romance/rainstorm.proze',
+            'title.proze',
         ]
         args = DotMap()
         args.path = paths.feelings

@@ -58,9 +58,13 @@ def _find_proze_files(args):
     @return: Paths to proze files found.
     """
     root = args.path if args.path else cwd.getcwd()
-    return sorted(
+    proze_files = sorted(
         glob.glob(root + '/**/*.proze', recursive=True)
     )
+    # Strip the base path from the glob patterns.
+    # Add one to root length to account for extra '/' character.
+    proze_files = [x[len(root) + 1:] for x in proze_files]
+    return proze_files
 
 
 def load(args):
