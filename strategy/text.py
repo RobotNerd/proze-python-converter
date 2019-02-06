@@ -59,9 +59,12 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @return: Formatted line for insertion into the document.
         """
         line = self.rules.clean_whitespace(line)
-        line = self.rules.first_character(state, use_spaces=True) + line
-        line = self._strip_bold_italics(line)
-        # TODO remove markup tags (Title, Chapter, etc)
+        if line == '':
+            line = None
+        else:
+            line = self.rules.first_character(state, use_spaces=True) + line
+            line = self._strip_bold_italics(line)
+            # TODO remove markup tags (Title, Chapter, etc)
         return line
 
     def _strip_bold_italics(self, line):
@@ -82,4 +85,6 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @type  state: lib.state.State
         @param state: Formatting state of the current line of text.
         """
-        self.handle.write(self._format(line, state))
+        line = self._format(line, state)
+        if line is not None:
+            self.handle.write(line + '\n')

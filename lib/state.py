@@ -39,10 +39,13 @@ class State(object):
         # True if italics is carried over from a previous line.
         self.is_italics = None
 
+        # True if the current line starts with a structural markup token.
+        self.is_markup_line = None
+
         # True if previous line processed was blank.
         self.is_previous_line_blank = None
 
-        # True if inside a secton.
+        # True if inside a section.
         self.is_section = None
 
         self.reset()
@@ -84,9 +87,10 @@ class State(object):
         self.is_chapter = False
         self.is_first_paragraph = False
         self.is_italics = False
+        self.is_markup_line = False
         self.is_previous_line_blank = True
         self.is_section = False
-    
+
     def _toggle_bold_and_italics(self, line):
         """Toggle state of bold and italics blocks that line wrap.
         @type  line: str
@@ -149,6 +153,7 @@ class State(object):
         """
         lowercase = line.lower()
         self.is_first_paragraph = False
+        self.is_markup_line = False
         if not self._process_blank_line(line):
             if not self._update_structural_markup_flags(lowercase):
                 if self._find_first_paragraph:
