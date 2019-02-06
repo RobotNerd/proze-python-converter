@@ -7,22 +7,34 @@ class TestState(unittest.TestCase):
 
     """Tests for tracking state of compilation process."""
 
-    def test_bold_wrapping(self):
-        """Bold formatting wraps from the previous line."""
+    def test_bold_wrapping_one_line(self):
+        """Bold formatting opened and closed on current line."""
         state = lib.state.State()
         self.assertFalse(state.is_bold)
         state.update('__test__')
         self.assertFalse(state.is_bold)
+
+    def test_bold_wrapping_multiple_hanging_open(self):
+        """Bold formatting, multiple and hanging open."""
+        state = lib.state.State()
+        self.assertFalse(state.is_bold)
         state.update('__test__ and __ test')
         self.assertTrue(state.is_bold)
-        state.reset()
+
+    def test_bold_wrapping_hanging_closed_by_bold_token(self):
+        """Bold formatting wraps from the previous line."""
+        state = lib.state.State()
         self.assertFalse(state.is_bold)
         state.update('__test')
         state.update('more proze')
         self.assertTrue(state.is_bold)
         state.update('__')
         self.assertFalse(state.is_bold)
-        state.reset()
+
+    def test_bold_wrapping_hanging_closed_by_newline(self):
+        """Bold formatting wraps from the previous line."""
+        state = lib.state.State()
+        self.assertFalse(state.is_bold)
         state.update('__test')
         state.update('more proze')
         self.assertTrue(state.is_bold)
