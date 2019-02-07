@@ -125,26 +125,23 @@ class State(object):
         if self.indent_level < 0:
                 self.indent_level = 0
 
-    def _update_structural_markup_flags(self, line):
+    def _update_structural_markup_flags(self, token):
         """Update flags based on structural markup token.
         @type  token: str
         @param token: Structural markup token found on the line.
         """
-        token = self._is_markup(line)
-        if token:
-            self.is_previous_line_blank = True
-            if token != 'author:':
-                self._find_first_paragraph = True
-            if token == 'chapter:':
-                self.is_chapter = True
-                self.is_section = False
-            elif token == 'section:' or token == self.section_break:
-                self.is_chapter = False
-                self.is_section = True
-            else:
-                self.is_chapter = False
-                self.is_section = False
-        return token is not None
+        self.is_previous_line_blank = True
+        if token != 'author:':
+            self._find_first_paragraph = True
+        if token == 'chapter:':
+            self.is_chapter = True
+            self.is_section = False
+        elif token == 'section:' or token == self.section_break:
+            self.is_chapter = False
+            self.is_section = True
+        else:
+            self.is_chapter = False
+            self.is_section = False
 
     def update(self, line):
         """Update the document state based on the current line.
@@ -155,7 +152,10 @@ class State(object):
         self.is_first_paragraph = False
         self.is_markup_line = False
         if not self._process_blank_line(line):
-            if not self._update_structural_markup_flags(lowercase):
+            token = self._is_markup(lowercase)
+            if token:
+                self._update_structural_markup_flags(token)
+            else:
                 if self._find_first_paragraph:
                     self._find_first_paragraph = False
                     self.is_first_paragraph = True
