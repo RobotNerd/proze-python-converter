@@ -72,7 +72,6 @@ class TestIndented(unittest.TestCase):
         """Interaction with bracketed blocks."""
         pass
 
-
     def test_with_structural_tags(self):
         """A chapter/title/sectiont tag in an blockquote."""
         pass
