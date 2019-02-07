@@ -30,10 +30,15 @@ class TestStatePreviousLineBlank(unittest.TestCase):
         state.update('a')
         self.assertFalse(state.is_previous_line_blank)
 
-    # TODO needs to be implemented once structural markup detection is fixed
-    # def test_previous_line_blank(self):
-    #     """Structural markup counts as a blank line."""
-    #     state = lib.state.State()
-    #     state.update('Chapter: test')
-    #     self.assertTrue(state.is_previous_line_blank)
-    #     self.assertFalse(state.is_markup_line)
+    def test_structural_markup(self):
+        state = lib.state.State()
+        state.update('Chapter: test')
+        self.assertTrue(state.is_previous_line_blank)
+        self.assertTrue(state.is_markup_line)
+
+    def test_structural_markup_previous_not_blank(self):
+        state = lib.state.State()
+        state.update('a')
+        state.update('Chapter: test')
+        self.assertFalse(state.is_previous_line_blank)
+        self.assertFalse(state.is_markup_line)
