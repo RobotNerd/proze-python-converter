@@ -2,8 +2,6 @@ from dotmap import DotMap
 import lib.state
 import unittest
 
-proze_line = 'a line of proze text'
-
 
 class TestStateChapterSection(unittest.TestCase):
 
