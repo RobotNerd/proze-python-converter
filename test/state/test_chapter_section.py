@@ -7,8 +7,7 @@ class TestStateChapterSection(unittest.TestCase):
 
     """Track whether the current line is in a chapter or section block."""
 
-    def test_1(self):
-        """Not in a chapter or section."""
+    def test_empty_string(self):
         state = lib.state.State()
         self.assertFalse(state.is_section)
         self.assertFalse(state.is_chapter)
@@ -18,70 +17,93 @@ class TestStateChapterSection(unittest.TestCase):
         self.assertFalse(state.is_chapter)
         self.assertFalse(state.is_markup_line)
 
-    def test_2(self):
-        """Not in a chapter or section."""
+    def test_chapter(self):
         state = lib.state.State()
-        state.update('')
-        state.update('test a line')
         state.update('Chapter: test')
         self.assertFalse(state.is_section)
-        self.assertTrue(state.is_chapter)  # TODO should be false; no newline
-        self.assertFalse(state.is_markup_line)
+        self.assertTrue(state.is_chapter)
+        self.assertTrue(state.is_markup_line)
 
-    def test_3(self):
-        """Not in a chapter or section."""
+    def test_section(self):
         state = lib.state.State()
-        state.update('')
-        state.update('test a line')
-        state.update('Chapter: test')
         state.update('Section: test')
-        self.assertTrue(state.is_section)  # TODO should be false; no newline
+        self.assertTrue(state.is_section)
         self.assertFalse(state.is_chapter)
-        self.assertFalse(state.is_markup_line)
+        self.assertTrue(state.is_markup_line)
 
-    def test_4(self):
-        """Not in a chapter or section."""
+    def test_section_break(self):
         state = lib.state.State()
-        state.update('')
-        state.update('test a line')
-        state.update('Chapter: test')
-        state.update('Section: test')
         state.update('---')
-        self.assertTrue(state.is_section)  # TODO should be false; no newline
+        self.assertTrue(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertTrue(state.is_markup_line)
+
+    def test_no_previous_blank_line_chapter(self):
+        state = lib.state.State()
+        state.update('test a line')
+        state.update('Chapter: test')
+        self.assertFalse(state.is_section)
         self.assertFalse(state.is_chapter)
         self.assertFalse(state.is_markup_line)
 
-    # def test_in_chapter_or_section(self):
-    #     """Not in a chapter or section."""
-    #     state = lib.state.State()
-    #     self.assertFalse(state.is_section)
-    #     self.assertFalse(state.is_chapter)
-    #     self.assertFalse(state.is_markup_line)
-    #     state.update('')
-    #     self.assertFalse(state.is_section)
-    #     self.assertFalse(state.is_chapter)
-    #     self.assertFalse(state.is_markup_line)
-    #     state.update('test a line')
-    #     self.assertFalse(state.is_section)
-    #     self.assertFalse(state.is_chapter)
-    #     self.assertFalse(state.is_markup_line)
-    #     state.update('Chapter: test')
-    #     self.assertFalse(state.is_section)
-    #     self.assertTrue(state.is_chapter)
-    #     self.assertFalse(state.is_markup_line)
-    #     state.update('Section: test')
-    #     self.assertTrue(state.is_section)
-    #     self.assertFalse(state.is_chapter)
-    #     self.assertFalse(state.is_markup_line)
-    #     state.update('---')
-    #     self.assertTrue(state.is_section)
-    #     self.assertFalse(state.is_chapter)
-    #     self.assertFalse(state.is_markup_line)
-    #     state.update('Chapter:')
-    #     self.assertFalse(state.is_section)
-    #     self.assertTrue(state.is_chapter)
-    #     self.assertFalse(state.is_markup_line)
-    #     state.update('---stuff')
-    #     self.assertFalse(state.is_section)
-    #     self.assertTrue(state.is_chapter)
-    #     self.assertFalse(state.is_markup_line)
+    def test_no_previous_blank_line_section(self):
+        state = lib.state.State()
+        state.update('test a line')
+        state.update('Section: test')
+        self.assertFalse(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertFalse(state.is_markup_line)
+
+    def test_no_previous_blank_line_section_break(self):
+        state = lib.state.State()
+        state.update('test a line')
+        state.update('---')
+        self.assertFalse(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertFalse(state.is_markup_line)
+
+    def test_contiguous_markup_lines(self):
+        state = lib.state.State()
+        state.update('Title: test')
+        self.assertFalse(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertTrue(state.is_markup_line)
+        state.update('Chapter: test')
+        self.assertFalse(state.is_section)
+        self.assertTrue(state.is_chapter)
+        self.assertTrue(state.is_markup_line)
+        state.update('Section: test')
+        self.assertTrue(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertTrue(state.is_markup_line)
+        state.update('---')
+        self.assertTrue(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertTrue(state.is_markup_line)
+
+    def test_contiguous_markup_lines_no_previous_blank_line(self):
+        state = lib.state.State()
+        state.update('test a line')
+        state.update('Title: test')
+        self.assertFalse(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertFalse(state.is_markup_line)
+        state.update('Chapter: test')
+        self.assertFalse(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertFalse(state.is_markup_line)
+        state.update('Section: test')
+        self.assertFalse(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertFalse(state.is_markup_line)
+        state.update('---')
+        self.assertFalse(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertFalse(state.is_markup_line)
+
+    def test_invalid_section_break(self):
+        state = lib.state.State()
+        state.update('---stuff')
+        self.assertFalse(state.is_section)
+        self.assertFalse(state.is_chapter)
+        self.assertFalse(state.is_markup_line)

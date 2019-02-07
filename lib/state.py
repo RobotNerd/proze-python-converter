@@ -57,11 +57,14 @@ class State(object):
         @rtype:  str
         @return: The markup token, None if not found.
         """
-        for token in self.structural_tokens:
-            if line.startswith(token):
-                return token
-        if line.strip() == self.section_break:
-            return self.section_break
+        if self.is_previous_line_blank:
+            for token in self.structural_tokens:
+                if line.startswith(token):
+                    self.is_markup_line = True
+                    return token
+            if line.strip() == self.section_break:
+                self.is_markup_line = True
+                return self.section_break
         return None
 
     def _process_blank_line(self, line):
