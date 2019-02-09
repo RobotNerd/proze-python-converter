@@ -6,6 +6,77 @@ whitespace = re.compile(r'^(\s+)[^\s-]')
 # TODO consider renaming is_previous_line_blank to start_new_paragraph
 
 
+class MarkupState(object):
+
+    """Track state related to structural markup."""
+
+    def __init__(self):
+        # True if inside a chapter.
+        self.is_chapter = None
+
+        # True if the current line starts with a structural markup token.
+        self.is_markup_line = None
+
+        # True if inside a section.
+        self.is_section = None
+
+        # The markup token value. None if current line isn't a markup token.
+        self.token = None
+
+        self.reset()
+
+    def reset(self):
+        """Reset all state values to default."""
+        self.is_chapter = False
+        self.is_markup_line = False
+        self.is_section = False
+        self.token = None
+
+    def is_markup(self, line, is_previous_line_blank):
+        """Check if the line is structural markup.
+        @type  line: str
+        @param line: Lowercase line of proze text.
+        @type  is_previous_line_blank: boolean
+        @param is_previous_line_blank: True if previous line can be treated
+            as a blank line.
+        """
+        if is_previous_line_blank:
+            self.token = None
+            if line.startswith(MarkupToken.author):
+                self.token = MarkupToken.author
+            elif line.startswith(MarkupToken.chapter):
+                self.token = MarkupToken.chapter
+            elif line.startswith(MarkupToken.section):
+                self.token = MarkupToken.section
+            elif line.startswith(MarkupToken.title):
+                self.token = MarkupToken.title
+            elif line.strip() == MarkupToken.section_break:
+                self.token = MarkupToken.section_break
+            if self.token is not None:
+                self.is_markup_line = True
+
+    def update_structural_markup_flags(self, is_previous_line_blank):
+        """Update flags based on structural markup token.
+        @type  is_previous_line_blank: boolean
+        @param is_previous_line_blank: True if previous line can be treated
+        """
+        is_previous_line_blank = True
+        if self.token != MarkupToken.author:
+            self._find_first_paragraph = True
+        if self.token == MarkupToken.chapter:
+            self.is_chapter = True
+            self.is_section = False
+        elif (
+            self.token == MarkupToken.section or
+            self.token == MarkupToken.section_break
+        ):
+            self.is_chapter = False
+            self.is_section = True
+        else:
+            self.is_chapter = False
+            self.is_section = False
+
+
 class State(object):
 
     """Track current state of document compilation."""
@@ -22,9 +93,6 @@ class State(object):
         # True if bold is carried over from a previous line.
         self.is_bold = None
 
-        # True if inside a chapter.
-        self.is_chapter = None
-
         # True if currently in the first paragraph after a title,
         # chapter, or section tag.
         self.is_first_paragraph = None
@@ -32,38 +100,13 @@ class State(object):
         # True if italics is carried over from a previous line.
         self.is_italics = None
 
-        # True if the current line starts with a structural markup token.
-        self.is_markup_line = None
-        # The markup token value. None if current line isn't a markup token.
-        self.markup_token = None
-
         # True if previous line processed was blank.
         self.is_previous_line_blank = None
 
-        # True if inside a section.
-        self.is_section = None
+        # Track state of structural markup tags.
+        self.markup = MarkupState()
 
         self.reset()
-
-    def _is_markup(self, line):
-        """Check if the line is structural markup.
-        @type  line: str
-        @param line: Lowercase line of proze text.
-        """
-        if self.is_previous_line_blank:
-            self.markup_token = None
-            if line.startswith(MarkupToken.author):
-                self.markup_token = MarkupToken.author
-            elif line.startswith(MarkupToken.chapter):
-                self.markup_token = MarkupToken.chapter
-            elif line.startswith(MarkupToken.section):
-                self.markup_token = MarkupToken.section
-            elif line.startswith(MarkupToken.title):
-                self.markup_token = MarkupToken.title
-            elif line.strip() == MarkupToken.section_break:
-                self.markup_token = MarkupToken.section_break
-            if self.markup_token is not None:
-                self.is_markup_line = True
 
     def _process_blank_line(self, line):
         """Update state if the line is blank.
@@ -82,15 +125,13 @@ class State(object):
 
     def reset(self):
         """Reset all state values to default."""
+        self.markup.reset()
         self._indent_leading_whitespace = []
         self.indent_level = 0
         self.is_bold = False
-        self.is_chapter = False
         self.is_first_paragraph = False
         self.is_italics = False
-        self.is_markup_line = False
         self.is_previous_line_blank = True
-        self.is_section = False
 
     def _toggle_bold_and_italics(self, line):
         """Toggle state of bold and italics blocks that line wrap.
@@ -126,24 +167,6 @@ class State(object):
         if self.indent_level < 0:
                 self.indent_level = 0
 
-    def _update_structural_markup_flags(self):
-        """Update flags based on structural markup token."""
-        self.is_previous_line_blank = True
-        if self.markup_token != MarkupToken.author:
-            self._find_first_paragraph = True
-        if self.markup_token == MarkupToken.chapter:
-            self.is_chapter = True
-            self.is_section = False
-        elif (
-            self.markup_token == MarkupToken.section or
-            self.markup_token == MarkupToken.section_break
-        ):
-            self.is_chapter = False
-            self.is_section = True
-        else:
-            self.is_chapter = False
-            self.is_section = False
-
     def update(self, line):
         """Update the document state based on the current line.
         @type  line: str
@@ -151,11 +174,15 @@ class State(object):
         """
         lowercase = line.lower()
         self.is_first_paragraph = False
-        self.is_markup_line = False
+        self.markup.is_markup_line = False
         if not self._process_blank_line(line):
-            self._is_markup(lowercase)
-            if self.markup_token:
-                self._update_structural_markup_flags()
+            self.markup.is_markup(lowercase, self.is_previous_line_blank)
+            if self.markup.token:
+                self.markup.update_structural_markup_flags(
+                    self.is_previous_line_blank
+                )
+                if self.markup.token != MarkupToken.author:
+                    self._find_first_paragraph = True
             else:
                 if self._find_first_paragraph:
                     self._find_first_paragraph = False

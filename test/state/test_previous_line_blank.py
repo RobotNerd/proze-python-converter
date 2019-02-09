@@ -34,11 +34,11 @@ class TestStatePreviousLineBlank(unittest.TestCase):
         state = lib.state.State()
         state.update('Chapter: test')
         self.assertTrue(state.is_previous_line_blank)
-        self.assertTrue(state.is_markup_line)
+        self.assertTrue(state.markup.is_markup_line)
 
     def test_structural_markup_previous_not_blank(self):
         state = lib.state.State()
         state.update('a')
         state.update('Chapter: test')
         self.assertFalse(state.is_previous_line_blank)
-        self.assertFalse(state.is_markup_line)
+        self.assertFalse(state.markup.is_markup_line)
