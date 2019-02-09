@@ -53,20 +53,20 @@ class TestCompileText(unittest.TestCase):
 #        with open(OUTPUT_PATH) as f:
 #            self.assertEqual(f.read(), expected.dark_and_stormy())
 
-    # def test_pumpkins(self):
-    #     """Compile the pumpkins sample project."""
-    #     args = DotMap()
-    #     args.doctype = 'txt'
-    #     args.output = OUTPUT_PATH[:-4]
-    #     args.path = projects.pumpkins.project
-    #     proze.run(args)
-    #     with open(OUTPUT_PATH, 'r') as output:
-    #         with open(projects.pumpkins.expected, 'r') as expected:
-    #             line1, line2 = output.readline(), expected.readline()
-    #             while (
-    #                 line1 == line2 and
-    #                 line1 is not None and
-    #                 line2 is not None
-    #             ):
-    #                 line1, line2 = output.readline(), expected.readline()
-    #             self.assertEqual(line1, line2)
+    def test_pumpkins(self):
+        """Compile the pumpkins sample project."""
+        args = DotMap()
+        args.doctype = 'txt'
+        args.output = OUTPUT_PATH[:-4]
+        args.path = projects.pumpkins.project
+        proze.run(args)
+        with open(OUTPUT_PATH, 'r') as output:
+            with open(projects.pumpkins.expected, 'r') as expected:
+                line1, line2 = output.readline(), expected.readline()
+                while (
+                    line1 == line2 and
+                    line1 is not None and
+                    line2 is not None
+                ):
+                    line1, line2 = output.readline(), expected.readline()
+                self.assertEqual(line1, line2)

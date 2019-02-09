@@ -1,5 +1,6 @@
-from strategy.base import BaseStrategy, BaseStrategyCompiler
 from lib.rules import Rules
+from lib.structural_token import MarkupToken
+from strategy.base import BaseStrategy, BaseStrategyCompiler
 import re
 
 
@@ -59,13 +60,35 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @return: Formatted line for insertion into the document.
         """
         line = self.rules.clean_whitespace(line)
-        if line == '':
-            line = None
-        else:
-            line = self.rules.first_character(state, use_spaces=True) + line
-            line = self._strip_bold_italics(line)
-            # TODO remove markup tags (Title, Chapter, etc)
+        if line:
+            if state.is_markup_line:
+                line = self._parse_structural_markup(line, state)
+            else:
+                first_char = self.rules.first_character(state, use_spaces=True)
+                line = first_char + line
+                line = self._strip_bold_italics(line)
         return line
+
+    def _parse_structural_markup(self, line, state):
+        """Process lines of structural markup.
+        @type  line: str
+        @param line: Proze formatted line to be written to the document.
+        @type  state: lib.state.State
+        @param state: Formatting state of the current line of text.
+        @rtype:  str
+        @return: Line after structural markup changes are applied.
+        """
+        if state.markup_token == MarkupToken.author:
+            line = re.sub(state.markup_token, 'by', line, flags=re.I)
+        elif state.markup_token == MarkupToken.chapter:
+            pass
+        elif state.markup_token == MarkupToken.section:
+            line = re.sub(state.markup_token, '', line, flags=re.I)
+        elif state.markup_token == MarkupToken.section_break:
+            line = line.strip()
+        elif state.markup_token == MarkupToken.title:
+            line = re.sub(state.markup_token, '', line, flags=re.I)
+        return line.strip()
 
     def _strip_bold_italics(self, line):
         """Remove bold and italic markup.
@@ -86,5 +109,5 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @param state: Formatting state of the current line of text.
         """
         line = self._format(line, state)
-        if line is not None:
+        if line:
             self.handle.write(line + '\n')
