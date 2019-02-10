@@ -45,12 +45,12 @@ class Rules(object):
             elif state.is_first_paragraph:
                 add_tab = False
                 if (
-                    state.is_chapter and
+                    state.markup.is_chapter and
                     self.options.compile.paragraph.tabFirst.chapter
                 ):
                     add_tab = True
                 elif (
-                    state.is_section and
+                    state.markup.is_section and
                     self.options.compile.paragraph.tabFirst.section
                 ):
                     add_tab = True

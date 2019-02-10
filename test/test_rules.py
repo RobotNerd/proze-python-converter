@@ -95,8 +95,8 @@ class TestNames(unittest.TestCase):
         state = State()
         state.previous_line.is_blank = True
         state.is_first_paragraph = True
-        state.is_chapter = True
-        state.is_section = False
+        state.markup.is_chapter = True
+        state.markup.is_section = False
         self.assertEqual(rules.first_character(state), '\t')
         self.assertEqual(rules.first_character(state, use_spaces=True), '    ')
         rules.options.compile.paragraph.mode = 'justified'
@@ -109,8 +109,8 @@ class TestNames(unittest.TestCase):
         state = State()
         state.previous_line.is_blank = True
         state.is_first_paragraph = True
-        state.is_chapter = False
-        state.is_section = True
+        state.markup.is_chapter = False
+        state.markup.is_section = True
         self.assertEqual(rules.first_character(state), '\t')
         self.assertEqual(rules.first_character(state, use_spaces=True), '    ')
         rules.options.compile.paragraph.mode = 'justified'
