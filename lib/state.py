@@ -28,7 +28,7 @@ class MarkupState(object):
         self.is_section = False
         self.token = None
 
-    def is_markup(self, line, is_previous_line_blank):
+    def check_markup(self, line, is_previous_line_blank):
         """Check if the line is structural markup.
         @type  line: str
         @param line: Lowercase line of proze text.
@@ -111,20 +111,33 @@ class State(object):
         self.previous = PreviousLine()
         self.reset()
 
-    def _process_blank_line(self, line):
-        """Update state if the line is blank.
-        Lines that contain only whitespace chars are considered to be blnak.
-        @type  line: str
-        @param line: Proze line.
-        @rtype:  bool
-        @return: True if the line is blank.
+    def _process_blank_line(self):
+        """Update state for a line that is blank.
+        Lines that contain only whitespace chars are considered to be blank.
         """
-        if line.strip() == '':
-            self.previous.is_blank = True
-            self.is_bold = False
-            self.is_italics = False
-            return True
-        return False
+        self.previous.is_blank = True
+        self.is_bold = False
+        self.is_italics = False
+
+    def _process_markup_line(self):
+        """Update state for a line of structural markup."""
+        self.markup.update_structural_markup_flags(self.previous.is_blank)
+        if self.markup.token != MarkupToken.author:
+            self._find_first_paragraph = True
+
+    def _process_proze_line(self, line, lowercase):
+        """Update state for a line of proze.
+        @type  line: str
+        @param line: Line parsed from file.
+        @type  lowercase: str
+        @param lowercase: Lowercase version of the line.
+        """
+        if self._find_first_paragraph:
+            self._find_first_paragraph = False
+            self.is_first_paragraph = True
+        self._toggle_bold_and_italics(lowercase)
+        self._update_indentation_level(line)
+        self.previous.is_blank = False
 
     def reset(self):
         """Reset all state values to default."""
@@ -179,18 +192,11 @@ class State(object):
         lowercase = line.lower()
         self.is_first_paragraph = False
         self.markup.is_markup_line = False
-        if not self._process_blank_line(line):
-            self.markup.is_markup(lowercase, self.previous.is_blank)
+        if line.strip() == '':
+            self._process_blank_line()
+        else:
+            self.markup.check_markup(lowercase, self.previous.is_blank)
             if self.markup.token:
-                self.markup.update_structural_markup_flags(
-                    self.previous.is_blank
-                )
-                if self.markup.token != MarkupToken.author:
-                    self._find_first_paragraph = True
+                self._process_markup_line()
             else:
-                if self._find_first_paragraph:
-                    self._find_first_paragraph = False
-                    self.is_first_paragraph = True
-                self._toggle_bold_and_italics(lowercase)
-                self._update_indentation_level(line)
-                self.previous.is_blank = False
+                self._process_proze_line(line, lowercase)
