@@ -29,6 +29,7 @@ class MarkupState(object):
         @type  is_previous_line_blank: PreviousLine
         @param is_previous_line_blank: State of the previous line.
         """
+        self.is_markup_line = False
         self.token = None
         if previous_line.is_blank or previous_line.is_structural_markup:
             if line.startswith(MarkupToken.author):
@@ -109,8 +110,7 @@ class State(object):
     def _process_markup_line(self):
         """Update state for a line of structural markup."""
         self.markup.update_structural_markup_flags()
-        if self.markup.token != MarkupToken.author:  # TODO check this logic
-            self._find_first_paragraph = True
+        self._find_first_paragraph = True
 
     def _process_proze_line(self, line, lowercase):
         """Update state for a line of proze.
@@ -189,7 +189,7 @@ class State(object):
         else:
             self._is_blank = False
             self.markup.check_markup(lowercase, self.previous_line)
-            if self.markup.token:
+            if self.markup.is_markup_line:
                 self._process_markup_line()
             else:
                 self._process_proze_line(line, lowercase)
