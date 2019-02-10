@@ -3,8 +3,6 @@ import re
 
 whitespace = re.compile(r'^(\s+)[^\s-]')
 
-# TODO consider renaming is_previous_line_blank to start_new_paragraph
-
 
 class MarkupState(object):
 
@@ -28,16 +26,15 @@ class MarkupState(object):
         self.is_section = False
         self.token = None
 
-    def check_markup(self, line, is_previous_line_blank):
+    def check_markup(self, line, previous_line):
         """Check if the line is structural markup.
         @type  line: str
         @param line: Lowercase line of proze text.
-        @type  is_previous_line_blank: boolean
-        @param is_previous_line_blank: True if previous line can be treated
-            as a blank line.
+        @type  is_previous_line_blank: PreviousLine
+        @param is_previous_line_blank: State of the previous line.
         """
-        if is_previous_line_blank:
-            self.token = None
+        self.token = None
+        if previous_line.is_blank or previous_line.is_structural_markup:
             if line.startswith(MarkupToken.author):
                 self.token = MarkupToken.author
             elif line.startswith(MarkupToken.chapter):
@@ -51,12 +48,13 @@ class MarkupState(object):
             if self.token is not None:
                 self.is_markup_line = True
 
-    def update_structural_markup_flags(self, is_previous_line_blank):
-        """Update flags based on structural markup token.
-        @type  is_previous_line_blank: boolean
-        @param is_previous_line_blank: True if previous line can be treated
-        """
-        is_previous_line_blank = True
+    def process_blank_line(self):
+        """Update state on a blank line."""
+        self.is_markup_line = False
+        self.token = None
+
+    def update_structural_markup_flags(self):
+        """Update flags based on structural markup token."""
         if self.token == MarkupToken.chapter:
             self.is_chapter = True
             self.is_section = False
@@ -83,8 +81,12 @@ class PreviousLine(object):
         self.reset()
 
     def reset(self):
-        self.is_blank = False
+        self.is_blank = True
         self.is_structural_markup = False
+
+    def update(self, is_blank, is_structural_markup):
+        self.is_blank = is_blank
+        self.is_structural_markup = is_structural_markup
 
 
 class State(object):
@@ -98,6 +100,8 @@ class State(object):
         # Track the indentation level for block quotes.
         self._indent_leading_whitespace = []
         self.indent_level = 0
+        # True if line is blank.
+        self._is_blank = None
         # True if bold is carried over from a previous line.
         self.is_bold = None
         # True if currently in the first paragraph after a title,
@@ -108,21 +112,22 @@ class State(object):
         # Track state of structural markup tags.
         self.markup = MarkupState()
         # Track state of the previous line of proze.
-        self.previous = PreviousLine()
+        self.previous_line = PreviousLine()
         self.reset()
 
     def _process_blank_line(self):
         """Update state for a line that is blank.
         Lines that contain only whitespace chars are considered to be blank.
         """
-        self.previous.is_blank = True
+        self._is_blank = True
         self.is_bold = False
         self.is_italics = False
+        self.markup.process_blank_line()
 
     def _process_markup_line(self):
         """Update state for a line of structural markup."""
-        self.markup.update_structural_markup_flags(self.previous.is_blank)
-        if self.markup.token != MarkupToken.author:
+        self.markup.update_structural_markup_flags()
+        if self.markup.token != MarkupToken.author:  # TODO check this logic
             self._find_first_paragraph = True
 
     def _process_proze_line(self, line, lowercase):
@@ -137,18 +142,17 @@ class State(object):
             self.is_first_paragraph = True
         self._toggle_bold_and_italics(lowercase)
         self._update_indentation_level(line)
-        self.previous.is_blank = False
 
     def reset(self):
         """Reset all state values to default."""
         self.markup.reset()
-        self.previous.reset()
+        self.previous_line.reset()
         self._indent_leading_whitespace = []
         self.indent_level = 0
+        self._is_blank = True
         self.is_bold = False
         self.is_first_paragraph = False
         self.is_italics = False
-        self.previous.is_blank = True
 
     def _toggle_bold_and_italics(self, line):
         """Toggle state of bold and italics blocks that line wrap.
@@ -165,7 +169,7 @@ class State(object):
         @type  line: str
         @param line: Proze line.
         """
-        if self.previous.is_blank:
+        if self.previous_line.is_blank:
             current = whitespace.match(line)
             if current:
                 current = current.group(1)
@@ -191,11 +195,12 @@ class State(object):
         """
         lowercase = line.lower()
         self.is_first_paragraph = False
-        self.markup.is_markup_line = False
+        self.previous_line.update(self._is_blank, self.markup.is_markup_line)
         if line.strip() == '':
             self._process_blank_line()
         else:
-            self.markup.check_markup(lowercase, self.previous.is_blank)
+            self._is_blank = False
+            self.markup.check_markup(lowercase, self.previous_line)
             if self.markup.token:
                 self._process_markup_line()
             else:

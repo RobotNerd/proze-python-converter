@@ -51,7 +51,7 @@ class TestNames(unittest.TestCase):
         """Don't insert tab in first paragraph in the story."""
         rules = self._create_rules_prose_first_char()
         state = State()
-        state.previous.is_blank = True
+        state.previous_line.is_blank = True
         state.is_first_paragraph = True
         state.is_chapter = False
         state.is_section = False
@@ -65,7 +65,7 @@ class TestNames(unittest.TestCase):
         """Insert a tab if it isn't the first paragraph."""
         rules = self._create_rules_prose_first_char()
         state = State()
-        state.previous.is_blank = True
+        state.previous_line.is_blank = True
         state.is_first_paragraph = False
         state.is_chapter = False
         state.is_section = False
@@ -79,7 +79,7 @@ class TestNames(unittest.TestCase):
         """Don't insert a tab if the previous line isn't blank."""
         rules = self._create_rules_prose_first_char()
         state = State()
-        state.previous.is_blank = False
+        state.previous_line.is_blank = False
         state.is_first_paragraph = False
         state.is_chapter = False
         state.is_section = False
@@ -93,7 +93,7 @@ class TestNames(unittest.TestCase):
         """Insert a tab for first paragraph of a chapter."""
         rules = self._create_rules_prose_first_char()
         state = State()
-        state.previous.is_blank = True
+        state.previous_line.is_blank = True
         state.is_first_paragraph = True
         state.is_chapter = True
         state.is_section = False
@@ -107,7 +107,7 @@ class TestNames(unittest.TestCase):
         """Insert a tab for first paragraph of a section."""
         rules = self._create_rules_prose_first_char()
         state = State()
-        state.previous.is_blank = True
+        state.previous_line.is_blank = True
         state.is_first_paragraph = True
         state.is_chapter = False
         state.is_section = True

@@ -40,7 +40,7 @@ class Rules(object):
         add_tab = False
         if self.options.compile.paragraph.mode == 'prose':
             add_tab = True
-            if not state.previous.is_blank:
+            if not state.previous_line.is_blank:
                 add_tab = False
             elif state.is_first_paragraph:
                 add_tab = False
