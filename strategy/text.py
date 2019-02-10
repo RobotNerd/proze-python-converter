@@ -61,7 +61,7 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         """
         line = self.rules.clean_whitespace(line)
         if line:
-            if state.is_markup_line:
+            if state.markup.is_markup_line:
                 line = self._parse_structural_markup(line, state)
             else:
                 first_char = self.rules.first_character(state, use_spaces=True)
@@ -78,16 +78,16 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @rtype:  str
         @return: Line after structural markup changes are applied.
         """
-        if state.markup_token == MarkupToken.author:
-            line = re.sub(state.markup_token, 'by', line, flags=re.I)
-        elif state.markup_token == MarkupToken.chapter:
+        if state.markup.token == MarkupToken.author:
+            line = re.sub(state.markup.token, 'by', line, flags=re.I)
+        elif state.markup.token == MarkupToken.chapter:
             pass
-        elif state.markup_token == MarkupToken.section:
-            line = re.sub(state.markup_token, '', line, flags=re.I)
-        elif state.markup_token == MarkupToken.section_break:
+        elif state.markup.token == MarkupToken.section:
+            line = re.sub(state.markup.token, '', line, flags=re.I)
+        elif state.markup.token == MarkupToken.section_break:
             line = line.strip()
-        elif state.markup_token == MarkupToken.title:
-            line = re.sub(state.markup_token, '', line, flags=re.I)
+        elif state.markup.token == MarkupToken.title:
+            line = re.sub(state.markup.token, '', line, flags=re.I)
         return line.strip()
 
     def _strip_bold_italics(self, line):

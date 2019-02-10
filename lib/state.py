@@ -13,16 +13,12 @@ class MarkupState(object):
     def __init__(self):
         # True if inside a chapter.
         self.is_chapter = None
-
         # True if the current line starts with a structural markup token.
         self.is_markup_line = None
-
         # True if inside a section.
         self.is_section = None
-
         # The markup token value. None if current line isn't a markup token.
         self.token = None
-
         self.reset()
 
     def reset(self):
@@ -61,8 +57,6 @@ class MarkupState(object):
         @param is_previous_line_blank: True if previous line can be treated
         """
         is_previous_line_blank = True
-        if self.token != MarkupToken.author:
-            self._find_first_paragraph = True
         if self.token == MarkupToken.chapter:
             self.is_chapter = True
             self.is_section = False
@@ -77,6 +71,22 @@ class MarkupState(object):
             self.is_section = False
 
 
+class PreviousLine(object):
+
+    """State of the previous line of the proze file."""
+
+    def __init__(self):
+        # True if the line can be treated as a blank line.
+        is_blank = None
+        # True if the line contained a structural markup tag.
+        is_structural_markup = None
+        self.reset()
+
+    def reset(self):
+        self.is_blank = False
+        self.is_structural_markup = False
+
+
 class State(object):
 
     """Track current state of document compilation."""
@@ -85,27 +95,20 @@ class State(object):
         # When true, the next line of proze is the first paragraph
         # after a new title, chapter, or section.
         self._find_first_paragraph = True
-
         # Track the indentation level for block quotes.
         self._indent_leading_whitespace = []
         self.indent_level = 0
-
         # True if bold is carried over from a previous line.
         self.is_bold = None
-
         # True if currently in the first paragraph after a title,
         # chapter, or section tag.
         self.is_first_paragraph = None
-
         # True if italics is carried over from a previous line.
         self.is_italics = None
-
-        # True if previous line processed was blank.
-        self.is_previous_line_blank = None
-
         # Track state of structural markup tags.
         self.markup = MarkupState()
-
+        # Track state of the previous line of proze.
+        self.previous = PreviousLine()
         self.reset()
 
     def _process_blank_line(self, line):
@@ -117,7 +120,7 @@ class State(object):
         @return: True if the line is blank.
         """
         if line.strip() == '':
-            self.is_previous_line_blank = True
+            self.previous.is_blank = True
             self.is_bold = False
             self.is_italics = False
             return True
@@ -126,12 +129,13 @@ class State(object):
     def reset(self):
         """Reset all state values to default."""
         self.markup.reset()
+        self.previous.reset()
         self._indent_leading_whitespace = []
         self.indent_level = 0
         self.is_bold = False
         self.is_first_paragraph = False
         self.is_italics = False
-        self.is_previous_line_blank = True
+        self.previous.is_blank = True
 
     def _toggle_bold_and_italics(self, line):
         """Toggle state of bold and italics blocks that line wrap.
@@ -148,7 +152,7 @@ class State(object):
         @type  line: str
         @param line: Proze line.
         """
-        if self.is_previous_line_blank:
+        if self.previous.is_blank:
             current = whitespace.match(line)
             if current:
                 current = current.group(1)
@@ -176,10 +180,10 @@ class State(object):
         self.is_first_paragraph = False
         self.markup.is_markup_line = False
         if not self._process_blank_line(line):
-            self.markup.is_markup(lowercase, self.is_previous_line_blank)
+            self.markup.is_markup(lowercase, self.previous.is_blank)
             if self.markup.token:
                 self.markup.update_structural_markup_flags(
-                    self.is_previous_line_blank
+                    self.previous.is_blank
                 )
                 if self.markup.token != MarkupToken.author:
                     self._find_first_paragraph = True
@@ -189,4 +193,4 @@ class State(object):
                     self.is_first_paragraph = True
                 self._toggle_bold_and_italics(lowercase)
                 self._update_indentation_level(line)
-                self.is_previous_line_blank = False
+                self.previous.is_blank = False
