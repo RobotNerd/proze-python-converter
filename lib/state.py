@@ -6,20 +6,24 @@ whitespace = re.compile(r'^(\s+)[^\s-]')
 
 class MarkupState(object):
 
-    """Track state related to structural markup."""
+    """Track state related to structural markup.
+
+    :ivar bool is_chapter: True if inside a chapter.
+    :ivar bool is_markup_line: True if the current line starts with a
+        structural markup token.
+    :ivar bool is_section: True if inside a section.
+    :ivar str token: The markup token value. None if current line isn't a
+        markup token.
+    """
 
     def __init__(self):
         self.reset()
 
     def reset(self):
         """Reset all state values to default."""
-        # True if inside a chapter.
         self.is_chapter = False
-        # True if the current line starts with a structural markup token.
         self.is_markup_line = False
-        # True if inside a section.
         self.is_section = False
-        # The markup token value. None if current line isn't a markup token.
         self.token = None
 
     def check_markup(self, line, previous_line):
@@ -68,15 +72,18 @@ class MarkupState(object):
 
 class PreviousLine(object):
 
-    """State of the previous line of the proze file."""
+    """State of the previous line of the proze file.
+
+    :ivar bool is_blank: True if the line can be treated as a blank line.
+    :ivar bool is_structural_markup: True if the line contained a structural
+        markup tag.
+    """
 
     def __init__(self):
         self.reset()
 
     def reset(self):
-        # True if the line can be treated as a blank line.
         self.is_blank = True
-        # True if the line contained a structural markup tag.
         self.is_structural_markup = False
 
     def update(self, is_blank, is_structural_markup):
@@ -86,15 +93,24 @@ class PreviousLine(object):
 
 class State(object):
 
-    """Track current state of document compilation."""
+    """Track current state of document compilation.
+
+    :ivar MarkupState markup: Manage state of structural markup tags.
+    :ivar PreviousLine previous_line: Manage state of previous line of proze.
+    :ivar int indent_level: The current indentation level of a block quote.
+    :ivar bool is_blank: True if line is blank.
+    :ivar bool is_bold: True if bold is carried over from a previous line.
+    :ivar bool is_first_paragraph: True if currently in the first paragraph
+        after a title, chapter, or section tag.
+    :ivar bool is_italics: True if italics is carried over from a
+        previous line.
+    :ivar bool _find_first_paragraph: When true, the next line of proze is
+        the first paragraph after a new title, chapter, or section.
+    """
 
     def __init__(self):
-        # When true, the next line of proze is the first paragraph
-        # after a new title, chapter, or section.
         self._find_first_paragraph = True
-        # Track state of structural markup tags.
         self.markup = MarkupState()
-        # Track state of the previous line of proze.
         self.previous_line = PreviousLine()
         self.reset()
 
@@ -129,17 +145,11 @@ class State(object):
         """Reset all state values to default."""
         self.markup.reset()
         self.previous_line.reset()
-        # Track the indentation level for block quotes.
         self._indent_leading_whitespace = []
         self.indent_level = 0
-        # True if line is blank.
         self.is_blank = True
-        # True if bold is carried over from a previous line.
         self.is_bold = False
-        # True if currently in the first paragraph after a title,
-        # chapter, or section tag.
         self.is_first_paragraph = False
-        # True if italics is carried over from a previous line.
         self.is_italics = False
 
     def _toggle_bold_and_italics(self, line):
