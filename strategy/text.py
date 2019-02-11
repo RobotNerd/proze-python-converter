@@ -60,13 +60,13 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @return: Formatted line for insertion into the document.
         """
         line = self.rules.clean_whitespace(line)
-        if line:
-            if state.markup.is_markup_line:
-                line = self._parse_structural_markup(line, state)
-            else:
-                first_char = self.rules.first_character(state, use_spaces=True)
-                line = first_char + line
-                line = self._strip_bold_italics(line)
+        if state.markup.is_markup_line:
+            line = self._parse_structural_markup(line, state)
+        else:
+            blank_lines = '\n\n' if state.is_first_paragraph else ''
+            first_char = self.rules.first_character(state, use_spaces=True)
+            line = blank_lines + first_char + line
+            line = self._strip_bold_italics(line)
         return line
 
     def _parse_structural_markup(self, line, state):
@@ -108,6 +108,6 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @type  state: lib.state.State
         @param state: Formatting state of the current line of text.
         """
-        line = self._format(line, state)
-        if line:
+        if not state.is_blank:
+            line = self._format(line, state)
             self.handle.write(line + '\n')

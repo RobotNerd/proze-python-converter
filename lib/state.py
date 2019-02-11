@@ -102,7 +102,7 @@ class State(object):
         """Update state for a line that is blank.
         Lines that contain only whitespace chars are considered to be blank.
         """
-        self._is_blank = True
+        self.is_blank = True
         self.is_bold = False
         self.is_italics = False
         self.markup.process_blank_line()
@@ -133,7 +133,7 @@ class State(object):
         self._indent_leading_whitespace = []
         self.indent_level = 0
         # True if line is blank.
-        self._is_blank = True
+        self.is_blank = True
         # True if bold is carried over from a previous line.
         self.is_bold = False
         # True if currently in the first paragraph after a title,
@@ -183,11 +183,11 @@ class State(object):
         """
         lowercase = line.lower()
         self.is_first_paragraph = False
-        self.previous_line.update(self._is_blank, self.markup.is_markup_line)
+        self.previous_line.update(self.is_blank, self.markup.is_markup_line)
         if line.strip() == '':
             self._process_blank_line()
         else:
-            self._is_blank = False
+            self.is_blank = False
             self.markup.check_markup(lowercase, self.previous_line)
             if self.markup.is_markup_line:
                 self._process_markup_line()
