@@ -2,7 +2,6 @@ from collections import namedtuple
 from test.mock import MockArgs
 import os
 import proze
-import test.expected_text as expected
 import unittest
 
 # The output of all test projects are compiled to the same file.
