@@ -1,4 +1,3 @@
-from dotmap import DotMap
 from lib.blocks import Blocks
 import unittest
 

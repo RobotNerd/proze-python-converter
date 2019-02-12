@@ -1,4 +1,3 @@
-from dotmap import DotMap
 import lib.state
 import unittest
 
