@@ -1,4 +1,3 @@
-# from dotmap import DotMap
 from test.mock import MockOptions
 from lib.names import Names
 import unittest
@@ -8,7 +7,6 @@ class TestNames(unittest.TestCase):
 
     def test_find_invalid(self):
         """Check a line of text for invalid names."""
-        # options = DotMap()
         options = MockOptions()
         options.names.invalid = ['Aaron', 'Gilbert', 'fillerator', ]
         names = Names(options)
@@ -35,7 +33,6 @@ class TestNames(unittest.TestCase):
 
     def test_invalid_with_punctuation(self):
         """Check for invalid names adjacent to punctuation marks."""
-        # options = DotMap()
         options = MockOptions()
         options.names.invalid = ['Aaron', 'Gilbert', 'FILLERATOR']
         names = Names(options)
@@ -58,7 +55,6 @@ class TestNames(unittest.TestCase):
 
     def test_invalid_inside_other_word(self):
         """It should not flag invalid words embedded inside a larger word."""
-        # options = DotMap()
         options = MockOptions()
         options.names.invalid = ['ing', 'owe']
         names = Names(options)

@@ -1,23 +1,17 @@
-from collections import namedtuple
+class MockArgs(object):
 
-# Note: For Python < 3.7, namedtuples don't support default values
-# as part of the constructor. The code below uses a workaround based
-# on https://stackoverflow.com/a/18348004/241025.
+    """Mock for command line args."""
 
-
-# Mock of command line arguments
-MockArgs = namedtuple('MockArgs', ['doctype', 'output', 'path'])
-MockArgs.__new__.__defaults__ = (None, None, None)
-
-# MockOptions = namedtuple('MockOptions', ['names'])
-# MockNames = namedtuple(
-#     'MockNames',
-#     ['characters', 'places', 'things', 'invalid']
-# )
-# MockNames.__new__.__defaults__ = (None, None, None, None)
+    def __init__(self, **kwargs):
+        self.doctype = kwargs.get('doctype')
+        self.output = kwargs.get('output')
+        self.path = kwargs.get('path')
 
 
 class NameOptions(object):
+
+    """Mock of configurable names."""
+
     def __init__(self):
         self.characters = []
         self.places = []
@@ -26,5 +20,8 @@ class NameOptions(object):
 
 
 class MockOptions(object):
+
+    """Mock of options parsed from config."""
+
     def __init__(self):
         self.names = NameOptions()

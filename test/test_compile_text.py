@@ -5,6 +5,7 @@ import proze
 import test.expected_text as expected
 import unittest
 
+# The output of all test projects are compiled to the same file.
 OUTPUT_PATH = 'test/sample/tmp/output.txt'
 
 Case = namedtuple('Case', ['root_path', 'expected_output'])
@@ -30,13 +31,19 @@ class TestCompileText(unittest.TestCase):
 
     def test_compile_empty(self):
         """A project with no config/proze files generates nothing."""
-        args = MockArgs('txt', OUTPUT_PATH[:-4], no_data.root_path)
+        args = MockArgs(
+            doctype='txt',
+            output=OUTPUT_PATH[:-4],
+            path=no_data.root_path)
         proze.run(args)
         self.assertFalse(os.path.isfile(OUTPUT_PATH))
 
     def test_compile_missing(self):
         """A project config file has links to files that don't exist."""
-        args = MockArgs('txt', OUTPUT_PATH[:-4], missing.root_path)
+        args = MockArgs(
+            doctype='txt',
+            output=OUTPUT_PATH[:-4],
+            path=missing.root_path)
         proze.run(args)
         with open(OUTPUT_PATH) as f:
             self.assertEqual(f.read(), '')
@@ -53,7 +60,10 @@ class TestCompileText(unittest.TestCase):
 
     def test_pumpkins(self):
         """Compile the pumpkins sample project."""
-        args = MockArgs('txt', OUTPUT_PATH[:-4], pumpkins.root_path)
+        args = MockArgs(
+            doctype='txt',
+            output=OUTPUT_PATH[:-4],
+            path=pumpkins.root_path)
         proze.run(args)
         with open(OUTPUT_PATH, 'r') as generated:
             text_generated = generated.read()
