@@ -1,19 +1,17 @@
-from dotmap import DotMap
+from test.mock import MockArgs
 import lib.config
 import unittest
 
-paths = DotMap()
-paths.dark_and_stormy = 'test/sample/dark-and-story'
-paths.feelings = 'test/sample/feelings'
-paths.no_data = 'test/sample/no_data'
+dark_and_stormy = 'test/sample/dark-and-story'
+feelings = 'test/sample/feelings'
+no_data = 'test/sample/no_data'
 
 
 class TestConfigLoader(unittest.TestCase):
 
     def test_compile_options(self):
         """Test loading compile options from config file."""
-        args = DotMap()
-        args.path = paths.dark_and_stormy
+        args = MockArgs(path=dark_and_stormy)
         options = lib.config.load(args)
         self.assertEqual(options.compile.paragraph.mode, 'prose')
         self.assertFalse(options.compile.paragraph.tabFirst.title)
@@ -39,8 +37,7 @@ class TestConfigLoader(unittest.TestCase):
             'Happenstance Plateau',
             'Yates',
         ]
-        args = DotMap()
-        args.path = paths.dark_and_stormy
+        args = MockArgs(path=dark_and_stormy)
         options = lib.config.load(args)
         self.assertEqual(options.names.characters, characters)
         self.assertEqual(options.names.places, places)
@@ -49,8 +46,7 @@ class TestConfigLoader(unittest.TestCase):
 
     def test_no_data(self):
         """Test a project path that doesn't have a config nor proze files."""
-        args = DotMap()
-        args.path = paths.no_data
+        args = MockArgs(path=no_data)
         options = lib.config.load(args)
         self.assertEqual(options.compile.order, [])
         self.assertEqual(options.names.characters, [])
@@ -76,8 +72,7 @@ class TestConfigLoader(unittest.TestCase):
             'reassurances.proze',
             'awakening.proze',
         ]
-        args = DotMap()
-        args.path = paths.dark_and_stormy
+        args = MockArgs(path=dark_and_stormy)
         options = lib.config.load(args)
         self.assertEqual(options.compile.order, order)
 
@@ -97,7 +92,6 @@ class TestConfigLoader(unittest.TestCase):
             'romance/rainstorm.proze',
             'title.proze',
         ]
-        args = DotMap()
-        args.path = paths.feelings
+        args = MockArgs(path=feelings)
         options = lib.config.load(args)
         self.assertEqual(options.compile.order, order)

@@ -1,4 +1,5 @@
 from collections import namedtuple
+from test.mock import MockArgs
 import os
 import proze
 import test.expected_text as expected
@@ -6,9 +7,7 @@ import unittest
 
 OUTPUT_PATH = 'test/sample/tmp/output.txt'
 
-CLIArgs = namedtuple('CLIArgs', ['doctype', 'output', 'path'])
 Case = namedtuple('Case', ['root_path', 'expected_output'])
-
 dark_and_stormy = Case('test/sample/dark-and-story', '')
 feelings = Case('test/sample/feelings', '')
 missing = Case('test/sample/missing_data', '')
@@ -31,13 +30,13 @@ class TestCompileText(unittest.TestCase):
 
     def test_compile_empty(self):
         """A project with no config/proze files generates nothing."""
-        args = CLIArgs('txt', OUTPUT_PATH[:-4], no_data.root_path)
+        args = MockArgs('txt', OUTPUT_PATH[:-4], no_data.root_path)
         proze.run(args)
         self.assertFalse(os.path.isfile(OUTPUT_PATH))
 
     def test_compile_missing(self):
         """A project config file has links to files that don't exist."""
-        args = CLIArgs('txt', OUTPUT_PATH[:-4], missing.root_path)
+        args = MockArgs('txt', OUTPUT_PATH[:-4], missing.root_path)
         proze.run(args)
         with open(OUTPUT_PATH) as f:
             self.assertEqual(f.read(), '')
@@ -54,7 +53,7 @@ class TestCompileText(unittest.TestCase):
 
     def test_pumpkins(self):
         """Compile the pumpkins sample project."""
-        args = CLIArgs('txt', OUTPUT_PATH[:-4], pumpkins.root_path)
+        args = MockArgs('txt', OUTPUT_PATH[:-4], pumpkins.root_path)
         proze.run(args)
         with open(OUTPUT_PATH, 'r') as generated:
             text_generated = generated.read()
