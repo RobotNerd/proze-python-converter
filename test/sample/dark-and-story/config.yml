@@ -31,5 +31,5 @@ compile:
       title: false
       chapter: true
       section: true
-    removeBlankLines: false
-  spacing: 'double'
+    removeBlankLines: true
+  spacing: 'single'

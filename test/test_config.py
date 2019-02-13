@@ -17,8 +17,8 @@ class TestConfigLoader(unittest.TestCase):
         self.assertFalse(options.compile.paragraph.tabFirst.title)
         self.assertTrue(options.compile.paragraph.tabFirst.chapter)
         self.assertTrue(options.compile.paragraph.tabFirst.section)
-        self.assertFalse(options.compile.paragraph.removeBlankLines)
-        self.assertEqual(options.compile.spacing, 'double')
+        self.assertTrue(options.compile.paragraph.removeBlankLines)
+        self.assertEqual(options.compile.spacing, 'single')
 
     def test_names(self):
         """Test names loaded from config file."""
