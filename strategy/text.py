@@ -50,6 +50,27 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         """Close the open file handle."""
         self.handle.close()
 
+    def _blank_lines(self, state):
+        """Determine the number of blank lines to insert before this one.
+        :param lib.state.State state: Formatting state of current line of text.
+        :return str: Line breaks to add as a prefix to the current line.
+        """
+        blank_lines = ''
+        if state.is_first_paragraph:
+            if state.markup.is_chapter or state.markup.is_section:
+                blank_lines = '\n'
+            else:
+                blank_lines = '\n\n'
+        elif state.markup.token:
+            if (
+                state.markup.token == MarkupToken.chapter or
+                state.markup.token == MarkupToken.section
+            ):
+                blank_lines = '\n\n'
+            elif state.markup.token == MarkupToken.section_break:
+                blank_lines = '\n'
+        return blank_lines
+
     def _format(self, line, state):
         """Format the line of text for the target document type.
         @type  line: str
@@ -60,10 +81,10 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         @return: Formatted line for insertion into the document.
         """
         line = self.rules.clean_whitespace(line)
+        blank_lines = self._blank_lines(state)
         if state.markup.is_markup_line:
-            line = self._parse_structural_markup(line, state)
+            line = blank_lines + self._parse_structural_markup(line, state)
         else:
-            blank_lines = '\n\n' if state.is_first_paragraph else ''
             first_char = self.rules.first_character(state, use_spaces=True)
             line = blank_lines + first_char + line
             line = self._strip_bold_italics(line)
@@ -81,7 +102,7 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         if state.markup.token == MarkupToken.author:
             line = re.sub(state.markup.token, 'by', line, flags=re.I)
         elif state.markup.token == MarkupToken.chapter:
-            pass
+            line = re.sub(state.markup.token, '', line, flags=re.I)
         elif state.markup.token == MarkupToken.section:
             line = re.sub(state.markup.token, '', line, flags=re.I)
         elif state.markup.token == MarkupToken.section_break:
