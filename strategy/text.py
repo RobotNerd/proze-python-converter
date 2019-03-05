@@ -3,6 +3,8 @@ from lib.structural_token import MarkupToken
 from strategy.base import BaseStrategy, BaseStrategyCompiler
 import re
 
+MAX_LINE_LENGTH = 80
+
 
 class TextStrategy(BaseStrategy):
 
@@ -111,6 +113,27 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
             line = re.sub(state.markup.token, '', line, flags=re.I)
         return line.strip()
 
+    def _split_on_line_length(self, line):
+        """Split into multiple lines if longer than MAX_LINE_LENGTH.
+        @type  line: str:
+        @param line: Text to be split.
+        @rtype:  list
+        @return: Split line.
+        """
+        lines = []
+        curr = line
+        while len(curr) > MAX_LINE_LENGTH:
+            index = MAX_LINE_LENGTH
+            while curr[index] not in [' ', '-'] and index >= 0:
+                index -= 1
+            if index == 0:
+                # Force a hard mid-word split for really long words.
+                index = MAX_LINE_LENGTH
+            lines.append(curr[0:index])
+            curr = curr[index+1:]
+        lines.append(curr)
+        return lines
+
     def _strip_bold_italics(self, line):
         """Remove bold and italic markup.
         @type  line: str
@@ -131,4 +154,6 @@ class _TextStrategyCompiler(BaseStrategyCompiler):
         """
         if not state.is_blank:
             line = self._format(line, state)
-            self.handle.write(line + '\n')
+            lines = self._split_on_line_length(line)
+            for partial in lines:
+                self.handle.write(partial + '\n')
